@@ -77,12 +77,16 @@ public class ModItemsImpl {
 
         for (Boat.Type type: Boat.Type.values()) {
 
-            register(new ResourceLocation(type.getName()).getPath() + "_" + CogEntity.ID,  new CogItem(type, new Item.Properties().stacksTo(1)));
-            register(new ResourceLocation(type.getName()).getPath() + "_" + BriggEntity.ID,  new BriggItem(type, new Item.Properties().stacksTo(1)));
-            register(new ResourceLocation(type.getName()).getPath() + "_" + GalleyEntity.ID,  new GalleyItem(type, new Item.Properties().stacksTo(1)));
-			register(new ResourceLocation(type.getName()).getPath() + "_" + DrakkarEntity.ID,  new DrakkarItem(type, new Item.Properties().stacksTo(1)));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + CogEntity.ID,  new CogItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeCogMaxHealth.get()))));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + BriggEntity.ID,  new BriggItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeBriggMaxHealth.get()))));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + GalleyEntity.ID,  new GalleyItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeGalleyMaxHealth.get()))));
+			register(new ResourceLocation(type.getName()).getPath() + "_" + DrakkarEntity.ID,  new DrakkarItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeDrakkarMaxHealth.get()))));
 
         }
+    }
+
+    private static int shipDurability(double maxHealth) {
+        return Math.max(1, (int) Math.ceil(maxHealth));
     }
 
     private static void register(String id, Item item) {
