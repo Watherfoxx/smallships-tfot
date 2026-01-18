@@ -29,9 +29,11 @@ import java.util.List;
 public abstract class ShipItem extends BoatItem {
     public static final String TAG_SAIL_COLOR = "SailColor";
     public static final String TAG_BANNER = "Banner";
+    private final Boat.Type shipType;
 
     public ShipItem(Boat.Type type, Properties properties) {
         super(false, type, properties);
+        this.shipType = type;
     }
 
     protected abstract @NotNull Boat getBoat(@NotNull Level level, @NotNull HitResult hitResult);
@@ -58,7 +60,7 @@ public abstract class ShipItem extends BoatItem {
 
         if (hitResult.getType() == HitResult.Type.BLOCK) {
             Boat boat = this.getBoat(level, hitResult);
-            boat.setVariant(this.type);
+            boat.setVariant(this.shipType);
             boat.moveTo(hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z, player.getYRot(), 0.0F);
             if (!level.noCollision(boat, boat.getBoundingBox())) {
                 return InteractionResultHolder.fail(itemStack);
