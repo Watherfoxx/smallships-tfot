@@ -391,6 +391,9 @@ public abstract class Ship extends Boat {
     @Override
     public @NotNull InteractionResult interact(@NotNull Player player, @NotNull InteractionHand interactionHand) {
         if(!this.isLocked()){
+            if (player.isCrouching() && interactionHand == InteractionHand.MAIN_HAND) {
+                return tryPickupShip(player);
+            }
             if(this.interactWithNameTag(player)) return InteractionResult.SUCCESS;
             if(this.interactIronNuggets(player)) return InteractionResult.SUCCESS;
             if (this instanceof Cannonable cannonShip && cannonShip.interactCannon(player, interactionHand)) return InteractionResult.SUCCESS;
@@ -400,6 +403,49 @@ public abstract class Ship extends Boat {
             return super.interact(player, interactionHand);
         }
         else return InteractionResult.PASS;
+    }
+
+    private InteractionResult tryPickupShip(@NotNull Player player) {
+        if (!this.getPassengers().isEmpty()) {
+            return InteractionResult.PASS;
+        }
+        if (this.level().isClientSide) {
+            return InteractionResult.SUCCESS;
+        }
+
+        ItemStack shipStack = createShipItemStack();
+        if (!shipStack.isEmpty()) {
+            this.spawnAtLocation(shipStack);
+        }
+        this.discard();
+        return InteractionResult.SUCCESS;
+    }
+
+    private ItemStack createShipItemStack() {
+        Item dropItem = this.getDropItem();
+        if (dropItem == ItemStack.EMPTY.getItem()) {
+            return ItemStack.EMPTY;
+        }
+
+        ItemStack shipStack = new ItemStack(dropItem);
+        if (shipStack.isDamageableItem()) {
+            int maxDamage = shipStack.getMaxDamage();
+            int damage = Mth.clamp((int) this.getDamage(), 0, maxDamage);
+            shipStack.setDamageValue(damage);
+        }
+
+        CompoundTag tag = shipStack.getOrCreateTag();
+        if (this instanceof Sailable) {
+            tag.putString(com.talhanation.smallships.world.item.ShipItem.TAG_SAIL_COLOR, this.getData(SAIL_COLOR));
+        }
+        if (this instanceof Bannerable) {
+            ItemStack bannerStack = this.getData(BANNER);
+            if (!bannerStack.isEmpty()) {
+                tag.put(com.talhanation.smallships.world.item.ShipItem.TAG_BANNER, bannerStack.save(new CompoundTag()));
+            }
+        }
+
+        return shipStack;
     }
 
     private boolean interactWithNameTag(@NotNull Player player){

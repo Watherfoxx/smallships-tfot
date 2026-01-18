@@ -1,6 +1,7 @@
 package com.talhanation.smallships.world.item.forge;
 
 import com.talhanation.smallships.SmallShipsMod;
+import com.talhanation.smallships.config.SmallShipsConfig;
 import com.talhanation.smallships.world.entity.ship.BriggEntity;
 import com.talhanation.smallships.world.entity.ship.CogEntity;
 import com.talhanation.smallships.world.entity.ship.DrakkarEntity;
@@ -42,11 +43,15 @@ public class ModItemsImpl {
         register("cannon_ball", () -> new CannonBallItem((new Item.Properties()).stacksTo(16)));
 
         for (Boat.Type type: Boat.Type.values()) {
-            register(new ResourceLocation(type.getName()).getPath() + "_" + CogEntity.ID,  () -> new CogItem(type, new Item.Properties().stacksTo(1)));
-            register(new ResourceLocation(type.getName()).getPath() + "_" + BriggEntity.ID,  () -> new BriggItem(type, new Item.Properties().stacksTo(1)));
-            register(new ResourceLocation(type.getName()).getPath() + "_" + GalleyEntity.ID,  () -> new GalleyItem(type, new Item.Properties().stacksTo(1)));
-            register(new ResourceLocation(type.getName()).getPath() + "_" + DrakkarEntity.ID,  () -> new DrakkarItem(type, new Item.Properties().stacksTo(1)));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + CogEntity.ID,  () -> new CogItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeCogMaxHealth.get()))));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + BriggEntity.ID,  () -> new BriggItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeBriggMaxHealth.get()))));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + GalleyEntity.ID,  () -> new GalleyItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeGalleyMaxHealth.get()))));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + DrakkarEntity.ID,  () -> new DrakkarItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeDrakkarMaxHealth.get()))));
         }
+    }
+
+    private static int shipDurability(double maxHealth) {
+        return Math.max(1, (int) Math.ceil(maxHealth));
     }
 
     private static void register(String id, Supplier<Item> itemSupplier) {
