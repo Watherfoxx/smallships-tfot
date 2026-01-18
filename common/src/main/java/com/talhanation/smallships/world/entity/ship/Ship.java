@@ -262,7 +262,10 @@ public abstract class Ship extends Boat {
             this.setRotSpeed(rotationSpeed);
 
             ((BoatAccessor) this).setDeltaRotation(rotationSpeed);
-            setYRot(getYRot() + ((BoatAccessor) this).getDeltaRotation());
+            float newYaw = getYRot() + ((BoatAccessor) this).getDeltaRotation();
+            setYRot(newYaw);
+            setYHeadRot(newYaw);
+            setRot(newYaw, getXRot());
 
 
             if(getDriver() != null) {
