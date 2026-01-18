@@ -406,7 +406,8 @@ public abstract class Ship extends Boat {
     }
 
     private InteractionResult tryPickupShip(@NotNull Player player) {
-        if (!this.getPassengers().isEmpty()) {
+        boolean hasPlayerPassenger = this.getPassengers().stream().anyMatch(passenger -> passenger instanceof Player);
+        if (hasPlayerPassenger) {
             return InteractionResult.PASS;
         }
         if (this.level().isClientSide) {
@@ -430,8 +431,10 @@ public abstract class Ship extends Boat {
         ItemStack shipStack = new ItemStack(dropItem);
         if (shipStack.isDamageableItem()) {
             int maxDamage = shipStack.getMaxDamage();
-            int damage = Mth.clamp((int) this.getDamage(), 0, maxDamage);
-            shipStack.setDamageValue(damage);
+            float maxHealth = (float) this.getAttributes().maxHealth;
+            float damagePercent = maxHealth <= 0.0F ? 1.0F : Mth.clamp(this.getDamage() / maxHealth, 0.0F, 1.0F);
+            int itemDamage = Mth.clamp(Math.round(damagePercent * maxDamage), 0, maxDamage);
+            shipStack.setDamageValue(itemDamage);
         }
 
         CompoundTag tag = shipStack.getOrCreateTag();
@@ -443,6 +446,9 @@ public abstract class Ship extends Boat {
             if (!bannerStack.isEmpty()) {
                 tag.put(com.talhanation.smallships.world.item.ShipItem.TAG_BANNER, bannerStack.save(new CompoundTag()));
             }
+        }
+        if (this instanceof Cannonable cannonShip) {
+            tag.putByte(com.talhanation.smallships.world.item.ShipItem.TAG_CANNON_COUNT, cannonShip.getCannonCount());
         }
 
         return shipStack;

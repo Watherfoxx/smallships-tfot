@@ -29,6 +29,7 @@ import java.util.List;
 public abstract class ShipItem extends BoatItem {
     public static final String TAG_SAIL_COLOR = "SailColor";
     public static final String TAG_BANNER = "Banner";
+    public static final String TAG_CANNON_COUNT = "CannonCount";
     private final Boat.Type shipType;
 
     public ShipItem(Boat.Type type, Properties properties) {
@@ -41,6 +42,9 @@ public abstract class ShipItem extends BoatItem {
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand interactionHand) {
         ItemStack itemStack = player.getItemInHand(interactionHand);
+        if (itemStack.isDamageableItem() && itemStack.getDamageValue() >= itemStack.getMaxDamage()) {
+            return InteractionResultHolder.fail(itemStack);
+        }
         HitResult hitResult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.ANY);
         if (hitResult.getType() == HitResult.Type.MISS) {
             return InteractionResultHolder.pass(itemStack);
@@ -87,9 +91,10 @@ public abstract class ShipItem extends BoatItem {
         }
 
         if (itemStack.isDamageableItem()) {
-            int maxHealth = (int) Math.ceil(ship.getAttributes().maxHealth);
-            int damage = Mth.clamp(itemStack.getDamageValue(), 0, maxHealth);
-            ship.setDamage(damage);
+            int maxDamage = Math.max(1, itemStack.getMaxDamage());
+            float maxHealth = (float) ship.getAttributes().maxHealth;
+            float damagePercent = Mth.clamp((float) itemStack.getDamageValue() / (float) maxDamage, 0.0F, 1.0F);
+            ship.setDamage(damagePercent * maxHealth);
         }
 
         CompoundTag tag = itemStack.getTag();
@@ -103,6 +108,11 @@ public abstract class ShipItem extends BoatItem {
 
         if (ship instanceof Bannerable && tag.contains(TAG_BANNER, Tag.TAG_COMPOUND)) {
             ship.setData(Ship.BANNER, ItemStack.of(tag.getCompound(TAG_BANNER)));
+        }
+        if (ship instanceof com.talhanation.smallships.world.entity.ship.abilities.Cannonable cannonShip
+                && tag.contains(TAG_CANNON_COUNT, Tag.TAG_BYTE)) {
+            cannonShip.setCannonCount(tag.getByte(TAG_CANNON_COUNT));
+            cannonShip.updateCannonCount();
         }
     }
 }
