@@ -121,8 +121,13 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
 
     @Override
     public @NotNull InteractionResult interact(@NotNull Player player, @NotNull InteractionHand interactionHand) {
-        if(!this.isLocked()) return this.canAddPassenger(player) && !player.isSecondaryUseActive() ? super.interact(player, interactionHand) : this.interactWithContainerVehicle(player);
-        else return InteractionResult.PASS;
+        if (this.isLocked()) {
+            return InteractionResult.PASS;
+        }
+        if (player.isSecondaryUseActive()) {
+            return super.interact(player, interactionHand);
+        }
+        return this.canAddPassenger(player) ? super.interact(player, interactionHand) : this.interactWithContainerVehicle(player);
     }
 
     @Override
