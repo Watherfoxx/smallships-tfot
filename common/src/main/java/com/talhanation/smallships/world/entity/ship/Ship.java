@@ -120,7 +120,8 @@ public abstract class Ship extends Boat {
     }
 
     private void syncRotationWithServer() {
-        if (!(this.getDriver() instanceof Player player)) {
+        Player player = this.getDriver();
+        if (player == null) {
             return;
         }
         if (!player.equals(Minecraft.getInstance().player)) {
