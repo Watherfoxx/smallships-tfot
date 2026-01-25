@@ -31,7 +31,6 @@ public class ServerboundSyncShipRotationForgePacket implements ForgePacket {
             if (player != null && player.getVehicle() instanceof Ship ship && ship.getDriver() == player) {
                 ship.setYRot(yaw);
                 ship.setYHeadRot(yaw);
-                ship.setRot(yaw, ship.getXRot());
             }
             ctx.get().setPacketHandled(true);
         });

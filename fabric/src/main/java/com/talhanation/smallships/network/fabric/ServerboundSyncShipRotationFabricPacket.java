@@ -39,7 +39,6 @@ public class ServerboundSyncShipRotationFabricPacket implements FabricPacket, Se
         if (player.getVehicle() instanceof Ship ship && ship.getDriver() == player) {
             ship.setYRot(yaw);
             ship.setYHeadRot(yaw);
-            ship.setRot(yaw, ship.getXRot());
         }
     }
 }
