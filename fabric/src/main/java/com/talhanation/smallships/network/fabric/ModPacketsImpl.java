@@ -24,6 +24,7 @@ public class ModPacketsImpl {
         entries.put("server_shoot_ship_cannon", (params) -> new ServerboundShootShipCannonFabricPacket((Boolean) params[0]));
         entries.put("server_set_sail_state", (params) -> new ServerboundSetSailStateFabricPacket((Byte) params[0]));
         entries.put("server_update_ship_control", (params) -> new ServerboundUpdateShipControlFabricPacket((Boolean) params[0], (Boolean) params[1], (Boolean) params[2], (Boolean) params[3]));
+        entries.put("server_sync_ship_rotation", (params) -> new ServerboundSyncShipRotationFabricPacket((Float) params[0]));
     }
 
     public static ModPackets.SendablePacket<FabricPacket> getPacket(String id) {
@@ -53,6 +54,11 @@ public class ModPacketsImpl {
 
         registerServerPacket(ModPackets.id("server_update_ship_control"), (server, player, handler, buf, responseSender) -> {
             ServerboundUpdateShipControlFabricPacket packet = new ServerboundUpdateShipControlFabricPacket(buf);
+            packet.receive(server, player, handler, buf, responseSender);
+        });
+
+        registerServerPacket(ModPackets.id("server_sync_ship_rotation"), (server, player, handler, buf, responseSender) -> {
+            ServerboundSyncShipRotationFabricPacket packet = new ServerboundSyncShipRotationFabricPacket(buf);
             packet.receive(server, player, handler, buf, responseSender);
         });
     }
