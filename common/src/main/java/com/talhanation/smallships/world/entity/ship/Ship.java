@@ -71,6 +71,8 @@ public abstract class Ship extends Boat {
     public float bannerWaveAngle;
     protected boolean cannonKeyPressed;
     public int sailStateCooldown = 0;
+    private float lastSyncedYaw = Float.NaN;
+    private int rotationSyncCooldown = 0;
     private float setPoint;
     public final List<Cannon> CANNONS = new ArrayList<>();
     public final Stack<ItemStack> SHIELDS = new Stack<>();
@@ -86,6 +88,10 @@ public abstract class Ship extends Boat {
     @Override
     public void tick() {
         super.tick();
+
+        if (this.level().isClientSide) {
+            syncRotationWithServer();
+        }
 
         if (this.getDamage() > 0.0F) {
             this.setDamage(this.getDamage() + 1.0F);
@@ -111,6 +117,30 @@ public abstract class Ship extends Boat {
             this.floatUp();
             if(outOfControlTicks > 0) --this.outOfControlTicks;
         }
+    }
+
+    private void syncRotationWithServer() {
+        Player player = this.getDriver();
+        if (player == null) {
+            return;
+        }
+        if (!player.equals(Minecraft.getInstance().player)) {
+            return;
+        }
+
+        if (rotationSyncCooldown > 0) {
+            rotationSyncCooldown--;
+        }
+
+        float currentYaw = this.getYRot();
+        float yawDelta = Float.isNaN(lastSyncedYaw) ? Float.MAX_VALUE : Math.abs(Mth.wrapDegrees(currentYaw - lastSyncedYaw));
+        if (rotationSyncCooldown > 0 && yawDelta < 0.5F) {
+            return;
+        }
+
+        ModPackets.clientSendPacket(player, ModPackets.serverSyncShipRotation.apply(currentYaw));
+        lastSyncedYaw = currentYaw;
+        rotationSyncCooldown = 2;
     }
 
     @Override
