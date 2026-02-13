@@ -424,9 +424,6 @@ public abstract class Ship extends Boat {
     @Override
     public @NotNull InteractionResult interact(@NotNull Player player, @NotNull InteractionHand interactionHand) {
         if(!this.isLocked()){
-            if (player.isCrouching() && interactionHand == InteractionHand.MAIN_HAND) {
-                return tryPickupShip(player);
-            }
             if(this.interactWithNameTag(player)) return InteractionResult.SUCCESS;
             if(this.interactIronNuggets(player)) return InteractionResult.SUCCESS;
             if (this instanceof Cannonable cannonShip && cannonShip.interactCannon(player, interactionHand)) return InteractionResult.SUCCESS;
@@ -530,7 +527,6 @@ public abstract class Ship extends Boat {
 
     @Override
     public @NotNull Vec3 getDismountLocationForPassenger(@NotNull LivingEntity livingEntity) {
-        if (this instanceof Sailable sailShip && sailShip.getSailState() != 0) sailShip.toggleSail();
         return super.getDismountLocationForPassenger(livingEntity);
     }
 
@@ -659,6 +655,13 @@ public abstract class Ship extends Boat {
             return false;
         }
         else if (!this.getCommandSenderWorld().isClientSide() && !this.isRemoved()) {
+            if (damageSource.getEntity() instanceof Player player && player.isCrouching()) {
+                InteractionResult pickupResult = tryPickupShip(player);
+                if (pickupResult.consumesAction()) {
+                    return true;
+                }
+            }
+
             this.setDamage(this.getDamage() + f * (this instanceof Shieldable shieldShip ? shieldShip.getDamageModifier() : 1));
             this.markHurt();
             this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
