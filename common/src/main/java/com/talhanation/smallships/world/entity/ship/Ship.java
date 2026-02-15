@@ -800,8 +800,11 @@ public abstract class Ship extends Boat {
     }
     @Override
     public void destroy(@NotNull DamageSource damageSource) {
-        super.destroy(damageSource);
         if (this.getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+            ItemStack shipStack = createShipItemStack();
+            if (!shipStack.isEmpty()) {
+                this.spawnAtLocation(shipStack);
+            }
             if(this instanceof ContainerShip containerShip) containerShip.chestVehicleDestroyed(damageSource, this.getCommandSenderWorld(), this);
             if(this instanceof Cannonable cannonableShip) cannonableShip.cannonShipDestroyed(this.getCommandSenderWorld(), this);
         }
