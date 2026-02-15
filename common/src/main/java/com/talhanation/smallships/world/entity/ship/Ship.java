@@ -47,6 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
+import java.util.UUID;
 
 public abstract class Ship extends Boat {
     public static final EntityDataAccessor<CompoundTag> ATTRIBUTES = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.COMPOUND_TAG);
@@ -78,6 +79,8 @@ public abstract class Ship extends Boat {
     public final Stack<ItemStack> SHIELDS = new Stack<>();
     public float maxSpeed;
     private CameraType previousCameraType;
+    @Nullable
+    private UUID lastDriverUuid;
 
     public Ship(EntityType<? extends Boat> entityType, Level level) {
         super(entityType, level);
@@ -88,6 +91,8 @@ public abstract class Ship extends Boat {
     @Override
     public void tick() {
         super.tick();
+
+        this.syncSailStateWithDriver();
 
         if (this.level().isClientSide) {
             syncRotationWithServer();
@@ -116,6 +121,22 @@ public abstract class Ship extends Boat {
             this.updateWaterMobs();
             this.floatUp();
             if(outOfControlTicks > 0) --this.outOfControlTicks;
+        }
+    }
+
+    private void syncSailStateWithDriver() {
+        if (this.level().isClientSide || !(this instanceof Sailable sailShip)) {
+            return;
+        }
+
+        Player driver = this.getDriver();
+        UUID currentDriverUuid = driver != null ? driver.getUUID() : null;
+
+        if (!Objects.equals(this.lastDriverUuid, currentDriverUuid)) {
+            if (sailShip.getSailState() != 0) {
+                sailShip.setSailState((byte) 0);
+            }
+            this.lastDriverUuid = currentDriverUuid;
         }
     }
 
