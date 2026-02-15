@@ -94,8 +94,8 @@ public interface Sailable extends Ability {
     }
 
     default void playSailSound(int state) {
-        if (state != 0) self().playSound(ModSoundTypes.SAIL_MOVE, 15.0F, Math.max(0.5F, 1.4F - ((float) state / 5.0F)));
-        else self().playSound(ModSoundTypes.SAIL_PULL, 10.0F, 1.0F);
+        if (state != 0) self().playSound(ModSoundTypes.SAIL_MOVE, 5.0F, Math.max(0.5F, 1.4F - ((float) state / 5.0F)));
+        else self().playSound(ModSoundTypes.SAIL_PULL, 4.0F, 1.0F);
     }
 
 
