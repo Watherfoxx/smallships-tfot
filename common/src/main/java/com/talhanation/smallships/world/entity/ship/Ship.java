@@ -135,6 +135,7 @@ public abstract class Ship extends Boat {
         if (!Objects.equals(this.lastDriverUuid, currentDriverUuid)) {
             if (sailShip.getSailState() != 0) {
                 sailShip.setSailState((byte) 0);
+                sailShip.playSailSound(0);
             }
             this.lastDriverUuid = currentDriverUuid;
         }
