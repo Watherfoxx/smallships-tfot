@@ -41,30 +41,28 @@ public interface Sailable extends Ability {
 
     default void controlBoatSailShip() {
         byte sailState = this.getSailState();
-        if(sailState != 0) {
-            if (self().isForward()) {
-                if (sailState != 4) {
-                    if(self().sailStateCooldown == 0){
-                        sailState++;
-                        if (!self().level().isClientSide()) {
-                            this.playSailSound(sailState);
-                        }
-                        self().sailStateCooldown = this.getSailStateCooldown();
-                        this.setSailState(sailState);
+        if (self().isForward()) {
+            if (sailState < 4) {
+                if(self().sailStateCooldown == 0){
+                    sailState++;
+                    if (!self().level().isClientSide()) {
+                        this.playSailSound(sailState);
                     }
+                    self().sailStateCooldown = this.getSailStateCooldown();
+                    this.setSailState(sailState);
                 }
             }
+        }
 
-            if (self().isBackward()) {
-                if (sailState != 1) {
-                    if(self().sailStateCooldown == 0) {
-                        sailState--;
-                        if (!self().level().isClientSide()) {
-                            this.playSailSound(sailState);
-                        }
-                        self().sailStateCooldown = this.getSailStateCooldown();
-                        this.setSailState(sailState);
+        if (self().isBackward()) {
+            if (sailState > 0) {
+                if(self().sailStateCooldown == 0) {
+                    sailState--;
+                    if (!self().level().isClientSide()) {
+                        this.playSailSound(sailState);
                     }
+                    self().sailStateCooldown = this.getSailStateCooldown();
+                    this.setSailState(sailState);
                 }
             }
         }

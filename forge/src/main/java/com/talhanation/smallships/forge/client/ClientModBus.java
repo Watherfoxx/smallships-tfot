@@ -4,12 +4,10 @@ import com.talhanation.smallships.SmallShipsMod;
 
 import com.talhanation.smallships.client.ClientInitializer;
 import com.talhanation.smallships.client.model.*;
-import com.talhanation.smallships.client.option.ModGameOptions;
 import com.talhanation.smallships.client.renderer.entity.*;
 import com.talhanation.smallships.world.entity.ModEntityTypes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -41,8 +39,4 @@ public class ClientModBus {
         event.registerLayerDefinition(DrakkarModel.LAYER_LOCATION, DrakkarModel::createBodyLayer);
     }
 
-    @SubscribeEvent
-    static void initRegisterKeyMappings(RegisterKeyMappingsEvent event) {
-        event.register(ModGameOptions.SAIL_KEY);
-    }
 }
