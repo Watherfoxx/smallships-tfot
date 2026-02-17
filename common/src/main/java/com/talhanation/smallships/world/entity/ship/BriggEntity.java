@@ -227,7 +227,7 @@ public class BriggEntity extends ContainerShip implements Bannerable, Sailable, 
 
     @Override
     public byte getMaxCannonPerSide(){
-        return 3;
+        return 2;
     }
 
     public @Nullable Vec3 applyLeashOffset() {
