@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrakkarEntity extends ContainerShip implements Bannerable, Sailable, Shieldable, Repairable, Leashable, Paddleable {
+public class DrakkarEntity extends ContainerShip implements Bannerable, Sailable, Shieldable, Cannonable, Repairable, Leashable, Paddleable {
     public static final String ID = "drakkar";
     private static final int ORIGINAL_CONTAINER_SIZE = SmallShipsConfig.Common.shipContainerDrakkarContainerSize.get();
 
@@ -72,7 +72,7 @@ public class DrakkarEntity extends ContainerShip implements Bannerable, Sailable
 
     @Override
     public int getMaxPassengers() {
-        return 11;
+        return 7;
     }
 
     @Override
@@ -206,6 +206,28 @@ public class DrakkarEntity extends ContainerShip implements Bannerable, Sailable
             this.getCommandSenderWorld().addParticle(ParticleTypes.BUBBLE, this.getX() - vector3d.x * (double) f2_ + (double) f0, this.getY() - vector3d.y + 0.8D, this.getZ() - vector3d.z * (double) (f2_ - x) + (double) f1 * 1.1, 0.0D, 0.0D, 0.0D);
             this.getCommandSenderWorld().addParticle(ParticleTypes.BUBBLE, this.getX() - vector3d.x * (double) f2_ - (double) f0, this.getY() - vector3d.y + 0.8D, this.getZ() - vector3d.z * (double) (f2_ - x) - (double) f1 * 1.1, 0.0D, 0.0D, 0.0D);
         }
+    }
+
+
+    @Override
+    public CannonPosition getCannonPosition(int index) {
+        List<CannonPosition> positionList = new ArrayList<>();
+        CannonPosition pos1 = new CannonPosition(-1.2, 0, 0.6, true);
+        CannonPosition pos2 = new CannonPosition(-1.2, 0, 0.6, false);
+        positionList.add(pos1);
+        positionList.add(pos2);
+
+        return positionList.get(index);
+    }
+
+    @Override
+    public byte getMaxCannonPerSide() {
+        return 1;
+    }
+
+    @Override
+    public float getDefaultCannonPower() {
+        return 4.0F;
     }
 
     public ShieldPosition getShieldPosition(int index){

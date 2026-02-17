@@ -143,7 +143,7 @@ public class CogEntity extends ContainerShip implements Bannerable, Sailable, Ca
 
     @Override
     public byte getMaxCannonPerSide(){
-        return 2;
+        return 1;
     }
 
     @Override
