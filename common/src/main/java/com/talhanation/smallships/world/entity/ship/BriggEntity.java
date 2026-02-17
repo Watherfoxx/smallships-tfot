@@ -207,14 +207,14 @@ public class BriggEntity extends ContainerShip implements Bannerable, Sailable, 
      **/
     public CannonPosition getCannonPosition(int index){
         List<CannonPosition> positionList = new ArrayList<>();
-        CannonPosition pos1 = new CannonPosition(-0.1, 0, 0.85, true);
-        CannonPosition pos2 = new CannonPosition(-0.1, 0, 0.85, false);
+        CannonPosition pos1 = new CannonPosition(1.4, 0, 0.75, true);
+        CannonPosition pos2 = new CannonPosition(1.4, 0, 0.75, false);
 
-        CannonPosition pos3 = new CannonPosition(-1.2, 0, 0.75, true);
-        CannonPosition pos4 = new CannonPosition(-1.2, 0, 0.75, false);
+        CannonPosition pos3 = new CannonPosition(-0.1, 0, 0.85, true);
+        CannonPosition pos4 = new CannonPosition(-0.1, 0, 0.85, false);
 
-        CannonPosition pos5 = new CannonPosition(1.4, 0, 0.75, true);
-        CannonPosition pos6 = new CannonPosition(1.4, 0, 0.75, false);
+        CannonPosition pos5 = new CannonPosition(-1.2, 0, 0.75, true);
+        CannonPosition pos6 = new CannonPosition(-1.2, 0, 0.75, false);
         positionList.add(pos1);
         positionList.add(pos2);
         positionList.add(pos3);
@@ -227,7 +227,7 @@ public class BriggEntity extends ContainerShip implements Bannerable, Sailable, 
 
     @Override
     public byte getMaxCannonPerSide(){
-        return 2;
+        return 3;
     }
 
     public @Nullable Vec3 applyLeashOffset() {
