@@ -130,15 +130,20 @@ public class CogEntity extends ContainerShip implements Bannerable, Sailable, Ca
         CannonPosition pos1 = new CannonPosition(1.4, 0.2, 0.6, true);
         CannonPosition pos2 = new CannonPosition(1.4, 0.2, 0.6, false);
 
+        CannonPosition pos3 = new CannonPosition(-0.6, 0.2, 0.6, true);
+        CannonPosition pos4 = new CannonPosition(-0.6, 0.2, 0.6, false);
+
         positionList.add(pos1);
         positionList.add(pos2);
+        positionList.add(pos3);
+        positionList.add(pos4);
 
         return positionList.get(index);
     }
 
     @Override
     public byte getMaxCannonPerSide(){
-        return 1;
+        return 2;
     }
 
     @Override
