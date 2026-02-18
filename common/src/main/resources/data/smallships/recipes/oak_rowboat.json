@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "rowboat",
+  "pattern": [
+    "b"
+  ],
+  "key": {
+    "b": {
+      "item": "minecraft:oak_boat"
+    }
+  },
+  "result": {
+    "item": "smallships:oak_rowboat"
+  }
+}

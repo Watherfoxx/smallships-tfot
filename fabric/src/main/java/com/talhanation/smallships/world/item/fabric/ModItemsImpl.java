@@ -6,6 +6,7 @@ import com.talhanation.smallships.world.entity.ship.BriggEntity;
 import com.talhanation.smallships.world.entity.ship.CogEntity;
 import com.talhanation.smallships.world.entity.ship.DrakkarEntity;
 import com.talhanation.smallships.world.entity.ship.GalleyEntity;
+import com.talhanation.smallships.world.entity.ship.RowBoatEntity;
 import com.talhanation.smallships.world.item.*;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -65,6 +66,7 @@ public class ModItemsImpl {
                     shipItems.add(ModItems.BRIGG_ITEMS.get(type));
                     shipItems.add(ModItems.GALLEY_ITEMS.get(type));
                     shipItems.add(ModItems.DRAKKAR_ITEMS.get(type));
+                    shipItems.add(ModItems.ROWBOAT_ITEMS.get(type));
                 }
                 entries.addBefore(Items.RAIL, shipItems.toArray(Item[]::new));
             });
@@ -81,6 +83,7 @@ public class ModItemsImpl {
             register(new ResourceLocation(type.getName()).getPath() + "_" + BriggEntity.ID,  new BriggItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeBriggMaxHealth.get()))));
             register(new ResourceLocation(type.getName()).getPath() + "_" + GalleyEntity.ID,  new GalleyItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeGalleyMaxHealth.get()))));
 			register(new ResourceLocation(type.getName()).getPath() + "_" + DrakkarEntity.ID,  new DrakkarItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeDrakkarMaxHealth.get()))));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + RowBoatEntity.ID,  new RowBoatItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(125.0D))));
 
         }
     }
