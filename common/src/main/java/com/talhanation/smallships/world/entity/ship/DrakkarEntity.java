@@ -22,7 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrakkarEntity extends ContainerShip implements Bannerable, Sailable, Shieldable, Repairable, Leashable, Paddleable {
+public class DrakkarEntity extends ContainerShip implements Bannerable, Sailable, Shieldable, Repairable, Leashable, Paddleable, Cannonable {
     public static final String ID = "drakkar";
     private static final int ORIGINAL_CONTAINER_SIZE = SmallShipsConfig.Common.shipContainerDrakkarContainerSize.get();
 
@@ -72,7 +72,7 @@ public class DrakkarEntity extends ContainerShip implements Bannerable, Sailable
 
     @Override
     public int getMaxPassengers() {
-        return 11;
+        return 7;
     }
 
     @Override
@@ -175,6 +175,27 @@ public class DrakkarEntity extends ContainerShip implements Bannerable, Sailable
     @Override
     public Bannerable.BannerPosition getBannerPosition() {
         return new BannerPosition(-180.0F, 90.0F, -4.5D, -0.15D, 0.05D); //+x=up, +y=back, +z=right
+    }
+
+
+    @Override
+    public float getDefaultCannonPower() {
+        return 4.0F;
+    }
+
+    public CannonPosition getCannonPosition(int index){
+        List<CannonPosition> positionList = new ArrayList<>();
+        CannonPosition pos1 = new CannonPosition(-1.2, 0, 0.6, true);
+        CannonPosition pos2 = new CannonPosition(-1.2, 0, 0.6, false);
+        positionList.add(pos1);
+        positionList.add(pos2);
+
+        return positionList.get(index);
+    }
+
+    @Override
+    public byte getMaxCannonPerSide(){
+        return 1;
     }
 
     @Override
