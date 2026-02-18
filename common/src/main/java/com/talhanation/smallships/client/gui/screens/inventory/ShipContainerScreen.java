@@ -1,8 +1,6 @@
 package com.talhanation.smallships.client.gui.screens.inventory;
 
 import com.talhanation.smallships.SmallShipsMod;
-import com.talhanation.smallships.config.SmallShipsConfig;
-import com.talhanation.smallships.math.Kalkuel;
 import com.talhanation.smallships.world.entity.ship.ContainerShip;
 import com.talhanation.smallships.world.inventory.ShipContainerMenu;
 import net.minecraft.client.gui.GuiGraphics;
@@ -83,32 +81,6 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
 
         int dmg = (int) (this.containerShip.getDamage() * 100 / this.containerShip.getAttributes().maxHealth);
 
-        String unit;
-        int maxSpeed;
-        int currentSpeed;
-        switch (SmallShipsConfig.Client.shipModSpeedUnit.get()){
-            default -> {
-                unit = "km/h";
-                maxSpeed = (Mth.ceil(Kalkuel.getKilometerPerHour(this.containerShip.maxSpeed)));
-                currentSpeed = (Mth.ceil(Kalkuel.getKilometerPerHour(this.containerShip.getSpeed())));
-            }
-            case 1 -> {
-                unit = "m/s";
-                maxSpeed = (Mth.ceil(Kalkuel.getMeterPerSecond(this.containerShip.maxSpeed)));
-                currentSpeed = (Mth.ceil(Kalkuel.getMeterPerSecond(this.containerShip.getSpeed())));
-            }
-            case 2 -> {
-                unit = "knots";
-                maxSpeed = (Mth.ceil(Kalkuel.getKnots(this.containerShip.maxSpeed)));
-                currentSpeed = (Mth.ceil(Kalkuel.getKnots(this.containerShip.getSpeed())));
-            }
-            case 3 -> {
-                unit = "mph";
-                maxSpeed = (Mth.ceil(Kalkuel.getMilesPerHour(this.containerShip.maxSpeed)));
-                currentSpeed = (Mth.ceil(Kalkuel.getMilesPerHour(this.containerShip.getSpeed())));
-            }
-        }
-
         int leftPos = 260;
         int leftPos2 = 323;
         int topPos = 38;
@@ -116,12 +88,10 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
         guiGraphics.pose().pushPose();
         guiGraphics.pose().scale(0.7F, 0.7F, 1F);
         guiGraphics.drawString(font, "Crew:", leftPos, topPos + gap * 0, FONT_COLOR, false);
-        guiGraphics.drawString(font, "Speed " + unit + ":", leftPos, topPos + gap * 1, FONT_COLOR, false);
-        guiGraphics.drawString(font, "Damage:", leftPos, topPos + gap * 2, FONT_COLOR, false);
+        guiGraphics.drawString(font, "Damage:", leftPos, topPos + gap * 1, FONT_COLOR, false);
 
         guiGraphics.drawString(font, currentPassengers + "/" + maxPassengers, leftPos2, topPos + gap * 0, FONT_COLOR, false);
-        guiGraphics.drawString(font, currentSpeed + "/" + maxSpeed, leftPos2, topPos + gap * 1, FONT_COLOR, false);
-        guiGraphics.drawString(font, dmg + "%", leftPos2, topPos + gap * 2, FONT_COLOR, false);
+        guiGraphics.drawString(font, dmg + "%", leftPos2, topPos + gap * 1, FONT_COLOR, false);
 
         guiGraphics.pose().popPose();
 

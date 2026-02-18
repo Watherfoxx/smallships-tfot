@@ -84,7 +84,11 @@ public abstract class Ship extends Boat {
 
     public Ship(EntityType<? extends Boat> entityType, Level level) {
         super(entityType, level);
-        if (this.getCustomName() == null) this.setCustomName(Component.literal(StringUtils.capitalize(EntityType.getKey(this.getType()).getPath())));
+        if (this.getCustomName() == null) {
+            String defaultName = StringUtils.capitalize(EntityType.getKey(this.getType()).getPath());
+            if (this instanceof DrakkarEntity) defaultName = "Longship";
+            this.setCustomName(Component.literal(defaultName));
+        }
         this.setMaxUpStep(0.6F);
     }
 
