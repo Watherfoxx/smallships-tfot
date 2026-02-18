@@ -52,7 +52,7 @@
   "item.smallships.dark_oak_rowboat": "Bateau à rames de chêne noir",
   "item.smallships.mangrove_rowboat": "Bateau à rames de mangrove",
 
-  "entity.smallships.drakkar": "Navire long",
+  "entity.smallships.drakkar": "Longship",
   "item.smallships.acacia_drakkar": "Navire long d'acajou",
   "item.smallships.birch_drakkar": "Navire long de bouleau",
   "item.smallships.jungle_drakkar": "Navire long de la jungle",
@@ -60,6 +60,8 @@
   "item.smallships.oak_drakkar": "Navire long de chêne",
   "item.smallships.dark_oak_drakkar": "Navire long de chêne noir",
   "item.smallships.mangrove_drakkar": "Navire long de mangrove",
+  "item.smallships.cherry_drakkar": "Longship de cerisier",
+  "item.smallships.bamboo_drakkar": "Longship en bambou",
 
   "entity.smallships.dhow": "Dhow",
   "item.smallships.oak_dhow": "Dhow de chêne",
