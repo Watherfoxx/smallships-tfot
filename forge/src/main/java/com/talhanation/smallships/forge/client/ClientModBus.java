@@ -27,6 +27,7 @@ public class ClientModBus {
         event.registerEntityRenderer(ModEntityTypes.BRIGG, BriggRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.GALLEY, GalleyRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.DRAKKAR, DrakkarRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.ROWBOAT, RowBoatRenderer::new);
     }
 
     @SubscribeEvent
@@ -37,6 +38,7 @@ public class ClientModBus {
         event.registerLayerDefinition(BriggModel.LAYER_LOCATION, BriggModel::createBodyLayer);
         event.registerLayerDefinition(GalleyModel.LAYER_LOCATION, GalleyModel::createBodyLayer);
         event.registerLayerDefinition(DrakkarModel.LAYER_LOCATION, DrakkarModel::createBodyLayer);
+        event.registerLayerDefinition(RowBoatModel.LAYER_LOCATION, RowBoatModel::createBodyLayer);
     }
 
 }

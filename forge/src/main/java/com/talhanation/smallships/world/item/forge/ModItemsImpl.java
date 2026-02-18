@@ -6,6 +6,7 @@ import com.talhanation.smallships.world.entity.ship.BriggEntity;
 import com.talhanation.smallships.world.entity.ship.CogEntity;
 import com.talhanation.smallships.world.entity.ship.DrakkarEntity;
 import com.talhanation.smallships.world.entity.ship.GalleyEntity;
+import com.talhanation.smallships.world.entity.ship.RowBoatEntity;
 import com.talhanation.smallships.world.item.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -47,6 +48,7 @@ public class ModItemsImpl {
             register(new ResourceLocation(type.getName()).getPath() + "_" + BriggEntity.ID,  () -> new BriggItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeBriggMaxHealth.get()))));
             register(new ResourceLocation(type.getName()).getPath() + "_" + GalleyEntity.ID,  () -> new GalleyItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeGalleyMaxHealth.get()))));
             register(new ResourceLocation(type.getName()).getPath() + "_" + DrakkarEntity.ID,  () -> new DrakkarItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeDrakkarMaxHealth.get()))));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + RowBoatEntity.ID,  () -> new RowBoatItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(125.0D))));
         }
     }
 
