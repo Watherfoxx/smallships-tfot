@@ -127,8 +127,8 @@ public class CogEntity extends ContainerShip implements Bannerable, Sailable, Ca
      **/
     public CannonPosition getCannonPosition(int index){
         List<CannonPosition> positionList = new ArrayList<>();
-        CannonPosition pos1 = new CannonPosition(1.4, 0.2, 0.6, true);
-        CannonPosition pos2 = new CannonPosition(1.4, 0.2, 0.6, false);
+        CannonPosition pos1 = new CannonPosition(-0.6, 0.2, 0.6, true);
+        CannonPosition pos2 = new CannonPosition(-0.6, 0.2, 0.6, false);
 
         positionList.add(pos1);
         positionList.add(pos2);
