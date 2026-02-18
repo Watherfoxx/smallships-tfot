@@ -68,7 +68,6 @@ public class RowBoatEntity extends Ship implements Repairable, Leashable, Paddle
         return -0.75F;
     }
 
-    @Override
     protected float getSinglePassengerZOffset() {
         return 0.0F;
     }
