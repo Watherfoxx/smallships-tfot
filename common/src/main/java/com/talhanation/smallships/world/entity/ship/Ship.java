@@ -692,17 +692,8 @@ public abstract class Ship extends Boat {
             this.markHurt();
             this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
 
-            boolean bl = damageSource.getEntity() instanceof Player player && player.getAbilities().instabuild && player.isCrouching();
-
-            if (this.getDamage() > this.getAttributes().maxHealth) {
-                if(this.isSunken() && this.sunkenTime > 200){
-                    this.destroy(this.getCommandSenderWorld().damageSources().drown());
-                }
-                else
-                    this.setSunken(true);
-            }
-            if(bl){
-                this.discard();
+            if (this.getDamage() > this.getAttributes().maxHealth && !this.isSunken()) {
+                this.setSunken(true);
             }
 
             return true;
