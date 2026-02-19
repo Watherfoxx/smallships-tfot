@@ -688,10 +688,26 @@ public abstract class Ship extends Boat {
                 }
             }
 
-            // Ships are only collectible via sneak + left click pickup and cannot be broken by damage.
-            return false;
+            this.setDamage(this.getDamage() + f * (this instanceof Shieldable shieldShip ? shieldShip.getDamageModifier() : 1));
+            this.markHurt();
+            this.gameEvent(GameEvent.ENTITY_DAMAGE, damageSource.getEntity());
+
+            boolean bl = damageSource.getEntity() instanceof Player player && player.getAbilities().instabuild && player.isCrouching();
+
+            if (this.getDamage() > this.getAttributes().maxHealth) {
+                if(this.isSunken() && this.sunkenTime > 200){
+                    this.destroy(this.getCommandSenderWorld().damageSources().drown());
+                }
+                else
+                    this.setSunken(true);
+            }
+            if(bl){
+                this.discard();
+            }
+
+            return true;
         } else {
-            return false;
+            return true;
         }
     }
 
