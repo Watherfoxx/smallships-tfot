@@ -111,14 +111,16 @@ public abstract class ShipItem extends BoatItem {
         }
         if (ship instanceof com.talhanation.smallships.world.entity.ship.abilities.Cannonable cannonShip
                 && tag.contains(TAG_CANNON_COUNT)) {
-            int cannonCount = 0;
-            if (tag.contains(TAG_CANNON_COUNT, Tag.TAG_BYTE)) {
-                cannonCount = tag.getByte(TAG_CANNON_COUNT);
+            double cannonCount = 0;
+            if (tag.contains(TAG_CANNON_COUNT, Tag.TAG_DOUBLE)) {
+                cannonCount = tag.getDouble(TAG_CANNON_COUNT);
             } else if (tag.contains(TAG_CANNON_COUNT, Tag.TAG_INT)) {
                 cannonCount = tag.getInt(TAG_CANNON_COUNT);
+            } else if (tag.contains(TAG_CANNON_COUNT, Tag.TAG_BYTE)) {
+                cannonCount = tag.getByte(TAG_CANNON_COUNT);
             }
             int maxCannons = cannonShip.getMaxCannonPerSide() * 2;
-            cannonShip.setCannonCount((byte) Mth.clamp(cannonCount, 0, maxCannons));
+            cannonShip.setCannonCount((byte) Mth.clamp(Math.round(cannonCount), 0, maxCannons));
             cannonShip.updateCannonCount();
         }
     }
