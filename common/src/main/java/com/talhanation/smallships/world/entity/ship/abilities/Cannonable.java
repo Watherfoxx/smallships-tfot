@@ -56,14 +56,14 @@ public interface Cannonable extends Ability {
     @SuppressWarnings("unused")
     default void readCannonShipSaveData(CompoundTag tag) {
         if (tag.contains("CannonCount")) {
-            this.setCannonCount(tag.getByte("CannonCount"));
+            this.setCannonCount((byte) Math.round(tag.getDouble("CannonCount")));
             this.updateCannonCount();
         }
     }
 
     @SuppressWarnings("unused")
     default void addCannonShipSaveData(CompoundTag tag) {
-        tag.putInt("CannonCount", this.getCannonCount());
+        tag.putDouble("CannonCount", this.getCannonCount());
     }
 
     default float getCannonModifier() {

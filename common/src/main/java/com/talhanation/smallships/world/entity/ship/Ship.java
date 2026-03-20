@@ -504,7 +504,7 @@ public abstract class Ship extends Boat {
             }
         }
         if (this instanceof Cannonable cannonShip) {
-            tag.putByte(com.talhanation.smallships.world.item.ShipItem.TAG_CANNON_COUNT, cannonShip.getCannonCount());
+            tag.putDouble(com.talhanation.smallships.world.item.ShipItem.TAG_CANNON_COUNT, cannonShip.getCannonCount());
         }
 
         return shipStack;
