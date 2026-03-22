@@ -27,7 +27,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.animal.WaterAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
@@ -244,7 +243,14 @@ public abstract class Ship extends Boat {
 
     @Override
     public boolean canAddPassenger(Entity entity) {
-       return super.canAddPassenger(entity) && !(entity instanceof Ship) && !SmallShipsConfig.Common.mountBlackList.get().contains(entity.getEncodeId()) && !this.isLocked() && this.getPassengers().size() < this.getMaxPassengers() && !entity.isPassenger() && entity.getBbWidth() < this.getBbWidth() && entity instanceof LivingEntity && !(entity instanceof WaterAnimal);
+        return super.canAddPassenger(entity)
+                && entity instanceof Player
+                && !(entity instanceof Ship)
+                && !SmallShipsConfig.Common.mountBlackList.get().contains(entity.getEncodeId())
+                && !this.isLocked()
+                && this.getPassengers().size() < this.getMaxPassengers()
+                && !entity.isPassenger()
+                && entity.getBbWidth() < this.getBbWidth();
     }
 
     public <T> void setData(EntityDataAccessor<T> accessor, T value) {
