@@ -71,10 +71,10 @@ public interface Sailable extends Ability {
     default boolean interactSail(Player player, InteractionHand interactionHand) {
         ItemStack item = player.getItemInHand(interactionHand);
         if (item.getItem() instanceof DyeItem dyeItem) {
+            if (!player.isCreative()) return false;
             String color = dyeItem.getDyeColor().getName();
             if (color.equals(self().getData(Ship.SAIL_COLOR))) return false;
             self().setData(Ship.SAIL_COLOR, color);
-            if (!player.isCreative()) item.shrink(1);
             self().level().playSound(player, self().getX(), self().getY() + 4 , self().getZ(), SoundEvents.WOOL_HIT, self().getSoundSource(), 15.0F, 1.5F);
             return true;
         }
