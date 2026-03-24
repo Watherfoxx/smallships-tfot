@@ -30,6 +30,7 @@ public abstract class ShipItem extends BoatItem {
     public static final String TAG_SAIL_COLOR = "SailColor";
     public static final String TAG_BANNER = "Banner";
     public static final String TAG_CANNON_COUNT = "CannonCount";
+    public static final String TAG_CANNON_BALL_COUNT = "CannonBallCount";
     private final Boat.Type shipType;
 
     public ShipItem(Boat.Type type, Properties properties) {
@@ -122,6 +123,18 @@ public abstract class ShipItem extends BoatItem {
             int maxCannons = cannonShip.getMaxCannonPerSide() * 2;
             cannonShip.setCannonCount((byte) Mth.clamp(Math.round(cannonCount), 0, maxCannons));
             cannonShip.updateCannonCount();
+        }
+        if (ship instanceof com.talhanation.smallships.world.entity.ship.abilities.Cannonable cannonShip
+                && tag.contains(TAG_CANNON_BALL_COUNT)) {
+            int cannonBallCount = 0;
+            if (tag.contains(TAG_CANNON_BALL_COUNT, Tag.TAG_DOUBLE)) {
+                cannonBallCount = Mth.floor(tag.getDouble(TAG_CANNON_BALL_COUNT));
+            } else if (tag.contains(TAG_CANNON_BALL_COUNT, Tag.TAG_INT)) {
+                cannonBallCount = tag.getInt(TAG_CANNON_BALL_COUNT);
+            } else if (tag.contains(TAG_CANNON_BALL_COUNT, Tag.TAG_BYTE)) {
+                cannonBallCount = tag.getByte(TAG_CANNON_BALL_COUNT);
+            }
+            cannonShip.setCannonBallCount(Math.max(cannonBallCount, 0));
         }
     }
 }

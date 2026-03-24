@@ -6,13 +6,14 @@ import com.talhanation.smallships.world.entity.projectile.Cannon;
 import com.talhanation.smallships.world.entity.ship.ContainerShip;
 import com.talhanation.smallships.world.entity.ship.Ship;
 import com.talhanation.smallships.world.item.ModItems;
+import com.talhanation.smallships.world.item.ShipItem;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.ContainerEntity;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -51,6 +52,7 @@ public interface Cannonable extends Ability {
     default void defineCannonShipSynchedData() {
         self().getEntityData().define(Ship.CANNON_POWER, this.getDefaultCannonPower());
         self().getEntityData().define(Ship.CANNON_COUNT, (byte) 0);
+        self().getEntityData().define(Ship.CANNON_BALL_COUNT, 0);
     }
 
     @SuppressWarnings("unused")
@@ -59,11 +61,23 @@ public interface Cannonable extends Ability {
             this.setCannonCount((byte) Math.round(tag.getDouble("CannonCount")));
             this.updateCannonCount();
         }
+        if (tag.contains(ShipItem.TAG_CANNON_BALL_COUNT)) {
+            int cannonBallCount = 0;
+            if (tag.contains(ShipItem.TAG_CANNON_BALL_COUNT, Tag.TAG_DOUBLE)) {
+                cannonBallCount = (int) Math.floor(tag.getDouble(ShipItem.TAG_CANNON_BALL_COUNT));
+            } else if (tag.contains(ShipItem.TAG_CANNON_BALL_COUNT, Tag.TAG_INT)) {
+                cannonBallCount = tag.getInt(ShipItem.TAG_CANNON_BALL_COUNT);
+            } else if (tag.contains(ShipItem.TAG_CANNON_BALL_COUNT, Tag.TAG_BYTE)) {
+                cannonBallCount = tag.getByte(ShipItem.TAG_CANNON_BALL_COUNT);
+            }
+            this.setCannonBallCount(Math.max(cannonBallCount, 0));
+        }
     }
 
     @SuppressWarnings("unused")
     default void addCannonShipSaveData(CompoundTag tag) {
         tag.putDouble("CannonCount", this.getCannonCount());
+        tag.putInt(ShipItem.TAG_CANNON_BALL_COUNT, this.getCannonBallCount());
     }
 
     default float getCannonModifier() {
@@ -112,37 +126,13 @@ public interface Cannonable extends Ability {
     }
 
     default boolean canShoot() {
-        if (self() instanceof ContainerEntity containerEntity){
-            return containerEntity.getItemStacks()
-                    .stream()
-                    .anyMatch(itemStack -> itemStack.getItem().equals(ModItems.CANNON_BALL));
-        }
-        else if(self().getControllingPassenger() instanceof Player player) {
-            return player.getInventory().items
-                    .stream()
-                    .anyMatch(itemStack -> itemStack.getItem().equals(ModItems.CANNON_BALL));
-        }
-        else
-            return false;
+        return this.getCannonBallCount() > 0;
     }
 
     default void consumeCannonBall() {
-        if (self() instanceof ContainerEntity containerEntity){
-            for(ItemStack itemstack: containerEntity.getItemStacks()){
-                if(itemstack.is((ModItems.CANNON_BALL))){
-                    itemstack.shrink(1);
-                    break;
-                }
-            }
-        }
-
-        else if(self().getControllingPassenger() instanceof Player player) {
-            for (ItemStack itemstack : player.getInventory().items) {
-                if (itemstack.is((ModItems.CANNON_BALL))) {
-                    itemstack.shrink(1);
-                    break;
-                }
-            }
+        int cannonBallCount = this.getCannonBallCount();
+        if (cannonBallCount > 0) {
+            this.setCannonBallCount(cannonBallCount - 1);
         }
     }
 
@@ -159,6 +149,14 @@ public interface Cannonable extends Ability {
 
     default List<Cannon> getCannons() {
         return self().CANNONS;
+    }
+
+    default void setCannonBallCount(int x) {
+        self().getEntityData().set(Ship.CANNON_BALL_COUNT, Math.max(x, 0));
+    }
+
+    default int getCannonBallCount() {
+        return self().getEntityData().get(Ship.CANNON_BALL_COUNT);
     }
 
     default void cannonShipDestroyed(Level level, Ship ship){
@@ -182,4 +180,3 @@ public interface Cannonable extends Ability {
         }
     }
 }
-

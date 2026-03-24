@@ -58,6 +58,7 @@ public abstract class Ship extends Boat {
     public static final EntityDataAccessor<ItemStack> BANNER = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.ITEM_STACK);
     public static final EntityDataAccessor<Float> CANNON_POWER = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.FLOAT);
     public static final EntityDataAccessor<Byte> CANNON_COUNT = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BYTE);
+    public static final EntityDataAccessor<Integer> CANNON_BALL_COUNT = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> FORWARD = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> BACKWARD = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
@@ -512,6 +513,7 @@ public abstract class Ship extends Boat {
         }
         if (this instanceof Cannonable cannonShip) {
             tag.putDouble(com.talhanation.smallships.world.item.ShipItem.TAG_CANNON_COUNT, cannonShip.getCannonCount());
+            tag.putInt(com.talhanation.smallships.world.item.ShipItem.TAG_CANNON_BALL_COUNT, cannonShip.getCannonBallCount());
         }
 
         return shipStack;
