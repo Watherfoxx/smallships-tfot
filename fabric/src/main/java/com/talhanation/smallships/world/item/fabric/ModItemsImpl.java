@@ -89,7 +89,7 @@ public class ModItemsImpl {
     }
 
     private static int shipDurability(double maxHealth) {
-        return 100;
+        return Math.max(1, (int) Math.ceil(maxHealth));
     }
 
     private static void register(String id, Item item) {

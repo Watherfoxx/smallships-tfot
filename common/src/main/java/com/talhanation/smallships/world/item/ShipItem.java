@@ -6,7 +6,6 @@ import com.talhanation.smallships.world.entity.ship.abilities.Sailable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
@@ -92,9 +91,8 @@ public abstract class ShipItem extends BoatItem {
 
         if (itemStack.isDamageableItem()) {
             int maxDamage = Math.max(1, itemStack.getMaxDamage());
-            float maxHealth = (float) ship.getAttributes().maxHealth;
-            float damagePercent = Mth.clamp((float) itemStack.getDamageValue() / (float) maxDamage, 0.0F, 1.0F);
-            ship.setDamage(damagePercent * maxHealth);
+            int itemDamage = Math.min(itemStack.getDamageValue(), maxDamage);
+            ship.setDamage(itemDamage);
         }
 
         CompoundTag tag = itemStack.getTag();
