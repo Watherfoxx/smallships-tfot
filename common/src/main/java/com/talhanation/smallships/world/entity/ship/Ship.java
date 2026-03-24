@@ -494,9 +494,7 @@ public abstract class Ship extends Boat {
         ItemStack shipStack = new ItemStack(dropItem);
         if (shipStack.isDamageableItem()) {
             int maxDamage = shipStack.getMaxDamage();
-            float maxHealth = (float) this.getAttributes().maxHealth;
-            float damagePercent = maxHealth <= 0.0F ? 1.0F : Mth.clamp(this.getDamage() / maxHealth, 0.0F, 1.0F);
-            int itemDamage = Mth.clamp(Math.round(damagePercent * maxDamage), 0, maxDamage);
+            int itemDamage = Mth.clamp(Math.round(this.getDamage()), 0, maxDamage);
             shipStack.setDamageValue(itemDamage);
         }
 
