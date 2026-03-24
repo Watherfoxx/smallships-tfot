@@ -6,6 +6,7 @@ import com.talhanation.smallships.world.entity.ship.abilities.Sailable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
