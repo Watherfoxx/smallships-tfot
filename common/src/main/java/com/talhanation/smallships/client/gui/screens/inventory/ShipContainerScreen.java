@@ -2,6 +2,7 @@ package com.talhanation.smallships.client.gui.screens.inventory;
 
 import com.talhanation.smallships.SmallShipsMod;
 import com.talhanation.smallships.world.entity.ship.ContainerShip;
+import com.talhanation.smallships.world.entity.ship.abilities.Cannonable;
 import com.talhanation.smallships.world.inventory.ShipContainerMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -80,6 +81,7 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
         int maxPassengers = this.containerShip.getMaxPassengers();
 
         int dmg = (int) (this.containerShip.getDamage() * 100 / this.containerShip.getAttributes().maxHealth);
+        int cannonBalls = this.containerShip instanceof Cannonable cannonShip ? cannonShip.getCannonBallCount() : 0;
 
         int leftPos = 260;
         int leftPos2 = 323;
@@ -89,9 +91,11 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
         guiGraphics.pose().scale(0.7F, 0.7F, 1F);
         guiGraphics.drawString(font, "Crew:", leftPos, topPos + gap * 0, FONT_COLOR, false);
         guiGraphics.drawString(font, "Damage:", leftPos, topPos + gap * 1, FONT_COLOR, false);
+        guiGraphics.drawString(font, Component.translatable("gui.smallships.ship_inventory.cannon_balls"), leftPos, topPos + gap * 2, FONT_COLOR, false);
 
         guiGraphics.drawString(font, currentPassengers + "/" + maxPassengers, leftPos2, topPos + gap * 0, FONT_COLOR, false);
         guiGraphics.drawString(font, dmg + "%", leftPos2, topPos + gap * 1, FONT_COLOR, false);
+        guiGraphics.drawString(font, String.valueOf(cannonBalls), leftPos2, topPos + gap * 2, FONT_COLOR, false);
 
         guiGraphics.pose().popPose();
 
