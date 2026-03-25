@@ -7,6 +7,7 @@
 "key.smallships.ship_inventory": "Schiffsinventar öffnen",
 "gui.smallships.ship_inventory.crew": "Besatzung:",
 "gui.smallships.ship_inventory.damage": "Schaden:",
+"gui.smallships.ship_inventory.cannon_balls": "Kanonenkugeln:",
 
 "death.attack.cannon_ball": "%s wurde von einer Kanonenkugel getroffen.",
 "death.attack.cannon_ball.player": "%s wurde von %s mit einer Kanone getroffen.",

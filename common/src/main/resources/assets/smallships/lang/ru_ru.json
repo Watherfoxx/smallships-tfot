@@ -7,6 +7,7 @@
   "key.smallships.ship_inventory" : "Корабельный инвентарь",
   "gui.smallships.ship_inventory.crew" : "Команда:",
   "gui.smallships.ship_inventory.damage" : "Урон:",
+  "gui.smallships.ship_inventory.cannon_balls" : "Ядра:",
   
   "death.attack.cannon_ball": "%s убит из пушки.",
   "death.attack.cannon_ball.player": "%s убит из пушки %s.",
