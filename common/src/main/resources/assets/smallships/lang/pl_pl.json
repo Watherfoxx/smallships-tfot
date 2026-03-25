@@ -5,6 +5,8 @@
   "key.smallships.higher_ship_sail" : "Opuść żagiel",
   "key.smallships.lower_ship_sail" : "Podnieś żagiel",
   "key.smallships.ship_inventory" : "Otwórz ekwipunek statku",
+  "gui.smallships.ship_inventory.crew" : "Załoga:",
+  "gui.smallships.ship_inventory.damage" : "Uszkodzenia:",
 
   "death.attack.cannon_ball": "%s dostał(a) z armaty.",
   "death.attack.cannon_ball.player": "%s dostał(a) kulą armatnią wystrzeloną przez %s.",

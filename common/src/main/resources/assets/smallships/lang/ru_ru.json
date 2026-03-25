@@ -5,6 +5,8 @@
   "key.smallships.higher_ship_sail" : "Поднять парус",
   "key.smallships.lower_ship_sail" : "Опустить парус",
   "key.smallships.ship_inventory" : "Корабельный инвентарь",
+  "gui.smallships.ship_inventory.crew" : "Команда:",
+  "gui.smallships.ship_inventory.damage" : "Урон:",
   
   "death.attack.cannon_ball": "%s убит из пушки.",
   "death.attack.cannon_ball.player": "%s убит из пушки %s.",
