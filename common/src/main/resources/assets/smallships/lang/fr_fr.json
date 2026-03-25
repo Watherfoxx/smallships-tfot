@@ -22,11 +22,13 @@
   "entity.smallships.cog": "Cogue",
   "item.smallships.acacia_cog": "Cogue",
   "item.smallships.birch_cog": "Cogue",
-  "item.smallships.jungle_cog": "Coguee",
+  "item.smallships.jungle_cog": "Cogue",
   "item.smallships.spruce_cog": "Cogue",
   "item.smallships.oak_cog": "Cogue",
   "item.smallships.dark_oak_cog": "Cogue",
   "item.smallships.mangrove_cog": "Cogue",
+  "item.smallships.cherry_cog": "Cogue",
+  "item.smallships.bamboo_cog": "Cogue",
 
   "entity.smallships.galley": "Galère",
   "item.smallships.acacia_galley": "Galère",
@@ -36,6 +38,8 @@
   "item.smallships.oak_galley": "Galère",
   "item.smallships.dark_oak_galley": "Galère",
   "item.smallships.mangrove_galley": "Galère",
+  "item.smallships.cherry_galley": "Galère",
+  "item.smallships.bamboo_galley": "Galère",
 
   "entity.smallships.war_galley": "Galère de guerre",
   "item.smallships.acacia_war_galley": "Galère de guerre",
@@ -45,6 +49,8 @@
   "item.smallships.oak_war_galley": "Galère de guerre",
   "item.smallships.dark_oak_war_galley": "Galère de guerre",
   "item.smallships.mangrove_war_galley": "Galère de guerre",
+  "item.smallships.cherry_war_galley": "Galère de guerre",
+  "item.smallships.bamboo_war_galley": "Galère de guerre",
 
   "entity.smallships.rowboat": "Chaloupe",
   "item.smallships.acacia_rowboat": "Chaloupe",
@@ -54,6 +60,8 @@
   "item.smallships.oak_rowboat": "Chaloupe",
   "item.smallships.dark_oak_rowboat": "Chaloupe",
   "item.smallships.mangrove_rowboat": "Chaloupe",
+  "item.smallships.cherry_rowboat": "Chaloupe",
+  "item.smallships.bamboo_rowboat": "Chaloupe",
 
   "entity.smallships.drakkar": "Navire long",
   "item.smallships.acacia_drakkar": "Navire long",
@@ -74,6 +82,8 @@
   "item.smallships.acacia_dhow": "Boutre",
   "item.smallships.dark_oak_dhow": "Boutre",
   "item.smallships.mangrove_dhow": "Boutre",
+  "item.smallships.cherry_dhow": "Boutre",
+  "item.smallships.bamboo_dhow": "Boutre",
 
   "entity.smallships.brigg": "Brigantin",
   "item.smallships.oak_brigg": "Brigantin",
@@ -83,6 +93,8 @@
   "item.smallships.acacia_brigg": "Brigantin",
   "item.smallships.dark_oak_brigg": "Brigantin",
   "item.smallships.mangrove_brigg": "Brigantin",
+  "item.smallships.cherry_brigg": "Brigantin",
+  "item.smallships.bamboo_brigg": "Brigantin",
 
   "tooltip.plane.damage": "Dégâts : %s %%",
   "tooltip.plane.throttle": "Accélération : %s %%",
