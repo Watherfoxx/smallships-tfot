@@ -2,6 +2,7 @@ package com.talhanation.smallships.client.gui.screens.inventory;
 
 import com.talhanation.smallships.SmallShipsMod;
 import com.talhanation.smallships.world.entity.ship.ContainerShip;
+import com.talhanation.smallships.world.entity.ship.abilities.Cannonable;
 import com.talhanation.smallships.world.inventory.ShipContainerMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -15,6 +16,7 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
     private static final ResourceLocation RESOURCE_LOCATION = new ResourceLocation(SmallShipsMod.MOD_ID,"textures/gui/ship_inventory.png" );
     private static final Component CREW_LABEL = Component.translatable("gui.smallships.ship_inventory.crew");
     private static final Component DAMAGE_LABEL = Component.translatable("gui.smallships.ship_inventory.damage");
+    private static final Component CANNON_BALLS_LABEL = Component.translatable("gui.smallships.ship_inventory.cannon_balls");
     public static final int FONT_COLOR = 4210752;
     private final int rowCount;
     private final int pageCount;
@@ -91,9 +93,13 @@ public class ShipContainerScreen extends AbstractContainerScreen<ShipContainerMe
         guiGraphics.pose().scale(0.7F, 0.7F, 1F);
         guiGraphics.drawString(font, CREW_LABEL, leftPos, topPos + gap * 0, FONT_COLOR, false);
         guiGraphics.drawString(font, DAMAGE_LABEL, leftPos, topPos + gap * 1, FONT_COLOR, false);
+        guiGraphics.drawString(font, CANNON_BALLS_LABEL, leftPos, topPos + gap * 2, FONT_COLOR, false);
+
+        int cannonBallCount = this.containerShip instanceof Cannonable cannonable ? cannonable.getCannonBallCount() : 0;
 
         guiGraphics.drawString(font, currentPassengers + "/" + maxPassengers, leftPos2, topPos + gap * 0, FONT_COLOR, false);
         guiGraphics.drawString(font, dmg + "%", leftPos2, topPos + gap * 1, FONT_COLOR, false);
+        guiGraphics.drawString(font, Integer.toString(cannonBallCount), leftPos2, topPos + gap * 2, FONT_COLOR, false);
 
         guiGraphics.pose().popPose();
 

@@ -7,6 +7,7 @@
   "key.smallships.ship_inventory" : "Abrir/cerrar inventario de barco",
   "gui.smallships.ship_inventory.crew" : "Tripulación:",
   "gui.smallships.ship_inventory.damage" : "Daño:",
+  "gui.smallships.ship_inventory.cannon_balls" : "Balas de cañón:",
 
   "death.attack.cannon_ball": "%s ha muerto por un disparo de cañón.",
   "death.attack.cannon_ball.player": "%s ha muerto por un disparo de cañón de %s.",

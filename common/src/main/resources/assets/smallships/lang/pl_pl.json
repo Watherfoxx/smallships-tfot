@@ -7,6 +7,7 @@
   "key.smallships.ship_inventory" : "Otwórz ekwipunek statku",
   "gui.smallships.ship_inventory.crew" : "Załoga:",
   "gui.smallships.ship_inventory.damage" : "Uszkodzenia:",
+  "gui.smallships.ship_inventory.cannon_balls" : "Kule armatnie:",
 
   "death.attack.cannon_ball": "%s dostał(a) z armaty.",
   "death.attack.cannon_ball.player": "%s dostał(a) kulą armatnią wystrzeloną przez %s.",
