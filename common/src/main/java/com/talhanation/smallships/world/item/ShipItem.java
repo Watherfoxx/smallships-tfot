@@ -38,7 +38,14 @@ public abstract class ShipItem extends BoatItem {
         this.shipType = type;
     }
 
+    protected abstract int getConfiguredMaxDamage();
+
     protected abstract @NotNull Boat getBoat(@NotNull Level level, @NotNull HitResult hitResult);
+
+    @Override
+    public int getMaxDamage(@NotNull ItemStack itemStack) {
+        return Math.max(1, getConfiguredMaxDamage());
+    }
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand interactionHand) {
