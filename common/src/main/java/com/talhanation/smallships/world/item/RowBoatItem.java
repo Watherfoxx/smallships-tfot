@@ -12,11 +12,6 @@ public class RowBoatItem extends ShipItem {
     }
 
     @Override
-    protected int getConfiguredMaxDamage() {
-        return 125;
-    }
-
-    @Override
     protected @NotNull Boat getBoat(@NotNull Level level, @NotNull HitResult hitResult) {
         return RowBoatEntity.summon(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z);
     }
