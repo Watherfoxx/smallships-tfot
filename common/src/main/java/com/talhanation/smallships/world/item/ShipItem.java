@@ -94,7 +94,10 @@ public abstract class ShipItem extends BoatItem {
         if (itemStack.isDamageableItem()) {
             int maxDamage = Math.max(1, itemStack.getMaxDamage());
             int itemDamage = Math.min(itemStack.getDamageValue(), maxDamage);
-            ship.setDamage(itemDamage);
+            int shipMaxHealth = Math.max(1, Math.round(ship.getAttributes().maxHealth));
+            int maxDurabilityOffset = Math.max(0, maxDamage - shipMaxHealth);
+            int shipDamage = Mth.clamp(itemDamage - maxDurabilityOffset, 0, shipMaxHealth);
+            ship.setDamage(shipDamage);
         }
 
         CompoundTag tag = itemStack.getTag();
