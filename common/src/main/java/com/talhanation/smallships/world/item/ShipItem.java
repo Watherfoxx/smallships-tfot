@@ -39,6 +39,12 @@ public abstract class ShipItem extends BoatItem {
     }
 
     protected abstract @NotNull Boat getBoat(@NotNull Level level, @NotNull HitResult hitResult);
+    protected abstract int getShipMaxHealth();
+
+    @Override
+    public int getMaxDamage() {
+        return Math.max(1, this.getShipMaxHealth());
+    }
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand interactionHand) {
@@ -94,7 +100,10 @@ public abstract class ShipItem extends BoatItem {
         if (itemStack.isDamageableItem()) {
             int maxDamage = Math.max(1, itemStack.getMaxDamage());
             int itemDamage = Math.min(itemStack.getDamageValue(), maxDamage);
-            ship.setDamage(itemDamage);
+            int shipMaxHealth = Math.max(1, Math.round(ship.getAttributes().maxHealth));
+            int maxDurabilityOffset = Math.max(0, maxDamage - shipMaxHealth);
+            int shipDamage = Mth.clamp(itemDamage - maxDurabilityOffset, 0, shipMaxHealth);
+            ship.setDamage(shipDamage);
         }
 
         CompoundTag tag = itemStack.getTag();

@@ -491,8 +491,11 @@ public abstract class Ship extends Boat {
 
         ItemStack shipStack = new ItemStack(dropItem);
         if (shipStack.isDamageableItem()) {
-            int maxDamage = shipStack.getMaxDamage();
-            int itemDamage = Mth.clamp(Math.round(this.getDamage()), 0, maxDamage);
+            int maxDamage = Math.max(1, shipStack.getMaxDamage());
+            int shipMaxHealth = Math.max(1, Math.round(this.getAttributes().maxHealth));
+            int maxDurabilityOffset = Math.max(0, maxDamage - shipMaxHealth);
+            int shipDamage = Mth.clamp(Math.round(this.getDamage()), 0, shipMaxHealth);
+            int itemDamage = Mth.clamp(maxDurabilityOffset + shipDamage, 0, maxDamage);
             shipStack.setDamageValue(itemDamage);
         }
 
