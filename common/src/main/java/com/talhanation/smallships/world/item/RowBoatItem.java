@@ -15,4 +15,9 @@ public class RowBoatItem extends ShipItem {
     protected @NotNull Boat getBoat(@NotNull Level level, @NotNull HitResult hitResult) {
         return RowBoatEntity.summon(level, hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z);
     }
+
+    @Override
+    protected int getShipMaxHealth() {
+        return 125;
+    }
 }
