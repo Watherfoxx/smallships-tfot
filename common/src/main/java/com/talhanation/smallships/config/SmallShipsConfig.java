@@ -2,6 +2,7 @@ package com.talhanation.smallships.config;
 
 import com.talhanation.smallships.SmallShipsMod;
 import com.talhanation.smallships.world.entity.ship.Ship;
+import com.talhanation.smallships.world.item.ShipItemDurabilityUpdater;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.IConfigSpec;
@@ -418,11 +419,15 @@ public class SmallShipsConfig {
 
     public static void updateConfig(ModConfig config) {
         int oldSchematicVersion = getSchematicVersion(config);
-        boolean hasBeenUpdated = switch (config.getType()) {
+        ModConfig.Type configType = config.getType();
+        boolean hasBeenUpdated = switch (configType) {
             case COMMON -> updateConfig(config, commonSchematicUpdater);
             case CLIENT -> updateConfig(config, clientSchematicUpdater);
             case SERVER -> false;
         };
+        if (configType == ModConfig.Type.COMMON) {
+            ShipItemDurabilityUpdater.updateFromConfig();
+        }
         int newSchematicVersion = getSchematicVersion(config);
         if (hasBeenUpdated) SmallShipsMod.LOGGER.warn("Updated config values of " + config.getFileName() + " from schematic version " + oldSchematicVersion + " to " + newSchematicVersion + "!");
     }
