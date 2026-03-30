@@ -1,7 +1,6 @@
 package com.talhanation.smallships.world.item.forge;
 
 import com.talhanation.smallships.SmallShipsMod;
-import com.talhanation.smallships.config.SmallShipsConfig;
 import com.talhanation.smallships.world.entity.ship.BriggEntity;
 import com.talhanation.smallships.world.entity.ship.CogEntity;
 import com.talhanation.smallships.world.entity.ship.DrakkarEntity;
@@ -24,6 +23,11 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class ModItemsImpl {
+    private static final int DEFAULT_COG_DURABILITY = 150;
+    private static final int DEFAULT_BRIGG_DURABILITY = 300;
+    private static final int DEFAULT_GALLEY_DURABILITY = 250;
+    private static final int DEFAULT_DRAKKAR_DURABILITY = 200;
+    private static final int DEFAULT_ROWBOAT_DURABILITY = 125;
     private static final Map<String, RegistryObject<Item>> entries = new HashMap<>();
 
     public static Item getItem(String id) {
@@ -44,17 +48,14 @@ public class ModItemsImpl {
         register("cannon_ball", () -> new CannonBallItem((new Item.Properties()).stacksTo(16)));
 
         for (Boat.Type type: Boat.Type.values()) {
-            register(new ResourceLocation(type.getName()).getPath() + "_" + CogEntity.ID,  () -> new CogItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeCogMaxHealth.get()))));
-            register(new ResourceLocation(type.getName()).getPath() + "_" + BriggEntity.ID,  () -> new BriggItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeBriggMaxHealth.get()))));
-            register(new ResourceLocation(type.getName()).getPath() + "_" + GalleyEntity.ID,  () -> new GalleyItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeGalleyMaxHealth.get()))));
-            register(new ResourceLocation(type.getName()).getPath() + "_" + DrakkarEntity.ID,  () -> new DrakkarItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(SmallShipsConfig.Common.shipAttributeDrakkarMaxHealth.get()))));
-            register(new ResourceLocation(type.getName()).getPath() + "_" + RowBoatEntity.ID,  () -> new RowBoatItem(type, new Item.Properties().stacksTo(1).durability(shipDurability(125.0D))));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + CogEntity.ID,  () -> new CogItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_COG_DURABILITY)));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + BriggEntity.ID,  () -> new BriggItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_BRIGG_DURABILITY)));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + GalleyEntity.ID,  () -> new GalleyItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_GALLEY_DURABILITY)));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + DrakkarEntity.ID,  () -> new DrakkarItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_DRAKKAR_DURABILITY)));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + RowBoatEntity.ID,  () -> new RowBoatItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_ROWBOAT_DURABILITY)));
         }
     }
 
-    private static int shipDurability(double maxHealth) {
-        return Math.max(1, (int) Math.ceil(maxHealth));
-    }
 
     private static void register(String id, Supplier<Item> itemSupplier) {
         entries.put(id, ITEMS.register(id, itemSupplier));
