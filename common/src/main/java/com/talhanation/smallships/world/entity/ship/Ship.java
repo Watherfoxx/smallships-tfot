@@ -39,7 +39,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -86,9 +85,7 @@ public abstract class Ship extends Boat {
     public Ship(EntityType<? extends Boat> entityType, Level level) {
         super(entityType, level);
         if (this.getCustomName() == null) {
-            String defaultName = StringUtils.capitalize(EntityType.getKey(this.getType()).getPath());
-            if (this instanceof DrakkarEntity) defaultName = "Longship";
-            this.setCustomName(Component.literal(defaultName));
+            this.setCustomName(Component.translatable(this.getType().getDescriptionId()));
         }
         this.setMaxUpStep(0.6F);
     }
