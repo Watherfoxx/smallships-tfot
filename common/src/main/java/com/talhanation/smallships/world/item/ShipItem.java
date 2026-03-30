@@ -42,7 +42,7 @@ public abstract class ShipItem extends BoatItem {
     protected abstract int getShipMaxHealth();
 
     @Override
-    public int getMaxDamage(@NotNull ItemStack itemStack) {
+    public int getMaxDamage() {
         return Math.max(1, this.getShipMaxHealth());
     }
 
