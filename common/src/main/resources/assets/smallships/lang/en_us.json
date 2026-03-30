@@ -5,9 +5,9 @@
   "key.smallships.higher_ship_sail": "Monter la voile",
   "key.smallships.lower_ship_sail": "Descendre la voile",
   "key.smallships.ship_inventory": "Ouvrir l'inventaire du bateau",
-  "gui.smallships.ship_inventory.crew": "Crew:",
-  "gui.smallships.ship_inventory.damage": "Damage:",
-  "gui.smallships.ship_inventory.cannon_balls": "Cannonballs:",
+  "gui.smallships.ship_inventory.crew": "Équipage :",
+  "gui.smallships.ship_inventory.damage": "Dégâts :",
+  "gui.smallships.ship_inventory.cannon_balls": "Boulets :",
 
   "death.attack.cannon_ball": "%s a été touché par un boulet de canon.",
   "death.attack.cannon_ball.player": "%s a été touché par un boulet de canon tiré par %s.",
