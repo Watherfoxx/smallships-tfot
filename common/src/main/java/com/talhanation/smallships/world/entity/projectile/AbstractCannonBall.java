@@ -15,6 +15,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.Level;
@@ -128,6 +130,11 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
             Entity hitEntity = hitResult.getEntity();
             Entity ownerEntity = this.getOwner();
 
+            // Ne pas infliger de dégâts aux armor stands et item frames
+            if (hitEntity instanceof ArmorStand || hitEntity instanceof ItemFrame) {
+                return;
+            }
+
             if (hitEntity instanceof Ship shipHitEntity) {
                 shipHitEntity.hurt(this.damageSources().thrown(this, ownerEntity), random.nextInt(7) + 7);
                 this.level().playSound(null, this.getX(), this.getY() + 4 , this.getZ(), ModSoundTypes.SHIP_HIT, this.getSoundSource(), 3.3F, 0.8F + 0.4F * this.random.nextFloat());
@@ -143,7 +150,7 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
     }
 
     public void hitParticles(){
-        for (int i = 0; i < 300; ++i) {
+        for (int i = 0; i < 150; ++i) {
             double d0 = this.random.nextGaussian() * 0.03D;
             double d1 = this.random.nextGaussian() * 0.03D;
             double d2 = this.random.nextGaussian() * 0.03D;
@@ -154,7 +161,7 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
     }
 
     public void waterParticles(){
-        for (int i = 0; i < 200; ++i) {
+        for (int i = 0; i < 100; ++i) {
             double d0 = this.random.nextGaussian() * 0.03D;
             double d1 = this.random.nextGaussian() * 0.03D;
             double d2 = this.random.nextGaussian() * 0.03D;
@@ -165,7 +172,7 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
 
 
     public void shootParticles(){
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 50; ++i) {
             double d0 = this.random.nextGaussian() * 0.03D;
             double d1 = this.random.nextGaussian() * 0.03D;
             double d2 = this.random.nextGaussian() * 0.03D;
@@ -173,7 +180,7 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
             this.level().addParticle(ParticleTypes.POOF, this.getX(1.0D) - d0 * d3, this.getRandomY() - d1 * d3, this.getRandomZ(2.0D) - d2 * d3, d0, d1, d2);
         }
 
-        for (int i = 0; i < 50; ++i) {
+        for (int i = 0; i < 25; ++i) {
             double d00 = this.random.nextGaussian() * 0.03D;
             double d11 = this.random.nextGaussian() * 0.03D;
             double d22 = this.random.nextGaussian() * 0.03D;
@@ -184,11 +191,11 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
     }
 
     public void tailParticles(){
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 50; ++i) {
             this.level().addParticle(ParticleTypes.POOF, this.getX(), this.getY(), this.getZ() , 0, 0, 0);
         }
 
-        for (int i = 0; i < 50; ++i) {
+        for (int i = 0; i < 25; ++i) {
             this.level().addParticle(ParticleTypes.FLAME, this.getX(), this.getY(), this.getZ(), 0, 0, 0);
         }
     }
