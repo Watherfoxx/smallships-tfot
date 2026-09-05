@@ -30,6 +30,7 @@ public class ClientInitializer implements ClientModInitializer {
 
         EntityRendererRegistry.register(ModEntityTypes.COG, CogRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.BRIGG, BriggRenderer::new);
+        EntityRendererRegistry.register(ModEntityTypes.GALLEON, GalleonRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.GALLEY, GalleyRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.DRAKKAR, DrakkarRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.ROWBOAT, RowBoatRenderer::new);
@@ -40,6 +41,7 @@ public class ClientInitializer implements ClientModInitializer {
 
         EntityModelLayerRegistry.registerModelLayer(CogModel.LAYER_LOCATION, CogModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(BriggModel.LAYER_LOCATION, BriggModel::createBodyLayer);
+        EntityModelLayerRegistry.registerModelLayer(GalleonModel.LAYER_LOCATION, GalleonModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(GalleyModel.LAYER_LOCATION, GalleyModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(DrakkarModel.LAYER_LOCATION, DrakkarModel::createBodyLayer);
         EntityModelLayerRegistry.registerModelLayer(RowBoatModel.LAYER_LOCATION, RowBoatModel::createBodyLayer);

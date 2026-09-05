@@ -5,6 +5,7 @@ import com.talhanation.smallships.config.SmallShipsConfig;
 import com.talhanation.smallships.forge.SmallshipsModForge;
 import com.talhanation.smallships.network.ModPackets;
 import com.talhanation.smallships.world.item.ModItems;
+import com.talhanation.smallships.world.item.ShipItemDurabilityUpdater;
 import com.talhanation.smallships.world.item.forge.ModItemsImpl;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -25,7 +26,10 @@ import java.util.function.Function;
 public class CommonModBus {
     @SubscribeEvent
     static void init(FMLCommonSetupEvent event) {
-        event.enqueueWork(ModPackets::registerPackets);
+        event.enqueueWork(() -> {
+            ModPackets.registerPackets();
+            ShipItemDurabilityUpdater.markItemsReady();
+        });
     }
 
     @SubscribeEvent
@@ -53,6 +57,7 @@ public class CommonModBus {
                     event.getEntries().putBefore(new ItemStack(Items.RAIL), new ItemStack(ModItems.COG_ITEMS.get(type)), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                     event.getEntries().putBefore(new ItemStack(Items.RAIL), new ItemStack(ModItems.BRIGG_ITEMS.get(type)), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                     event.getEntries().putBefore(new ItemStack(Items.RAIL), new ItemStack(ModItems.GALLEY_ITEMS.get(type)), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
+                    event.getEntries().putBefore(new ItemStack(Items.RAIL), new ItemStack(ModItems.GALLEON_ITEMS.get(type)), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
                     event.getEntries().putBefore(new ItemStack(Items.RAIL), new ItemStack(ModItems.DRAKKAR_ITEMS.get(type)), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
 
                 }

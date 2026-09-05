@@ -1,0 +1,1 @@
+{"parent":"minecraft:recipes/root","criteria":{"has_brigg":{"trigger":"minecraft:inventory_changed","conditions":{"items":[{"items":["smallships:bamboo_brigg"]}]}}},"requirements":[["has_brigg"]],"rewards":{"recipes":["smallships:bamboo_galleon"]}}

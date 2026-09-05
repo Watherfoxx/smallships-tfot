@@ -13,6 +13,7 @@ public class ModPackets {
     public static final SendablePacket<ModPacket> serverUpdateShipControl = getPacket("server_update_ship_control");
     public static final SendablePacket<ModPacket> serverSetSailState = getPacket("server_set_sail_state");
     public static final SendablePacket<ModPacket> serverSyncShipRotation = getPacket("server_sync_ship_rotation");
+    public static final SendablePacket<ModPacket> serverUseGalleonHelm = getPacket("server_use_galleon_helm");
 
     @ExpectPlatform
     public static SendablePacket<ModPacket> getPacket(String id) {

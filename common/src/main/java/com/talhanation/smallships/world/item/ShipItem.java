@@ -67,11 +67,11 @@ public abstract class ShipItem extends BoatItem {
             Boat boat = this.getBoat(level, hitResult);
             boat.setVariant(this.shipType);
             boat.moveTo(hitResult.getLocation().x, hitResult.getLocation().y, hitResult.getLocation().z, player.getYRot(), 0.0F);
-            if (!level.noCollision(boat, boat.getBoundingBox())) {
+            if (!this.canPlaceBoat(level, boat)) {
                 return InteractionResultHolder.fail(itemStack);
             }
             if (!level.isClientSide) {
-                applyItemDataToBoat(boat, itemStack);
+                applyItemDataToBoat(boat, itemStack, player);
                 level.addFreshEntity(boat);
                 level.gameEvent(player, GameEvent.ENTITY_PLACE, ((BlockHitResult) hitResult).getBlockPos());
                 if (!player.getAbilities().instabuild) {
@@ -86,10 +86,16 @@ public abstract class ShipItem extends BoatItem {
         return InteractionResultHolder.pass(itemStack);
     }
 
-    private void applyItemDataToBoat(@NotNull Boat boat, @NotNull ItemStack itemStack) {
+    protected boolean canPlaceBoat(@NotNull Level level, @NotNull Boat boat) {
+        return level.noCollision(boat, boat.getBoundingBox());
+    }
+
+    private void applyItemDataToBoat(@NotNull Boat boat, @NotNull ItemStack itemStack, @NotNull Player player) {
         if (!(boat instanceof Ship ship)) {
             return;
         }
+
+        ship.setOwner(player);
 
         if (itemStack.isDamageableItem()) {
             int maxDamage = Math.max(1, itemStack.getMaxDamage());

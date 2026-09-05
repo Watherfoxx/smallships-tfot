@@ -1,0 +1,1 @@
+{"parent":"minecraft:recipes/root","criteria":{"has_brigg":{"trigger":"minecraft:inventory_changed","conditions":{"items":[{"items":["smallships:spruce_brigg"]}]}}},"requirements":[["has_brigg"]],"rewards":{"recipes":["smallships:spruce_galleon"]}}

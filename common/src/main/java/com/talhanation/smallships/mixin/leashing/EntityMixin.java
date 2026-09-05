@@ -1,8 +1,11 @@
 package com.talhanation.smallships.mixin.leashing;
 
 import com.talhanation.smallships.duck.BoatLeashAccess;
+import com.talhanation.smallships.duck.VanillaBoatAccess;
+import com.talhanation.smallships.world.entity.ship.Ship;
 import com.talhanation.smallships.world.entity.ship.abilities.Leashable;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +37,15 @@ public class EntityMixin {
     private void removeAfterChangingDimensionsLeashedShip(CallbackInfo ci) {
         if (self() instanceof Leashable || self().getClass().equals(Boat.class)) {
             ((BoatLeashAccess)this).dropLeash(true, false);
+        }
+    }
+
+    @Inject(method = "skipAttackInteraction(Lnet/minecraft/world/entity/Entity;)Z", at = @At("HEAD"), cancellable = true)
+    private void skipAttackInteractionVanillaBoat(Entity attacker, CallbackInfoReturnable<Boolean> cir) {
+        if (attacker instanceof Player player && self().getClass().equals(Boat.class) && !(self() instanceof Ship) && self() instanceof VanillaBoatAccess vanillaBoat) {
+            if (vanillaBoat.smallships$handleAttackInteraction(player)) {
+                cir.setReturnValue(true);
+            }
         }
     }
 

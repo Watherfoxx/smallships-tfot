@@ -6,6 +6,7 @@ import com.talhanation.smallships.world.entity.ship.BriggEntity;
 import com.talhanation.smallships.world.entity.ship.CogEntity;
 import com.talhanation.smallships.world.entity.ship.DrakkarEntity;
 import com.talhanation.smallships.world.entity.ship.GalleyEntity;
+import com.talhanation.smallships.world.entity.ship.GalleonEntity;
 import com.talhanation.smallships.world.entity.ship.RowBoatEntity;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -58,6 +59,16 @@ public class ModEntityTypesImpl {
                         .setUpdateInterval(10)
                         .setShouldReceiveVelocityUpdates(true)
                         .build(GalleyEntity.ID)));
+
+        entries.put(GalleonEntity.class, ENTITY_TYPES.register(GalleonEntity.ID,
+                () -> EntityType.Builder.of(GalleonEntity::new, MobCategory.MISC)
+                        // Keep vanilla buoyancy compact; oriented hull volumes
+                        // provide the actual 34x8 collision footprint.
+                        .sized(3.5F, 1.25F)
+                        .clientTrackingRange(32)
+                        .setUpdateInterval(3)
+                        .setShouldReceiveVelocityUpdates(true)
+                        .build(GalleonEntity.ID)));
 
         entries.put(DrakkarEntity.class, ENTITY_TYPES.register(DrakkarEntity.ID,
                 () -> EntityType.Builder.of(DrakkarEntity::new, MobCategory.MISC)

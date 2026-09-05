@@ -4,6 +4,7 @@ import com.talhanation.smallships.world.entity.ship.BriggEntity;
 import com.talhanation.smallships.world.entity.ship.CogEntity;
 import com.talhanation.smallships.world.entity.ship.DrakkarEntity;
 import com.talhanation.smallships.world.entity.ship.GalleyEntity;
+import com.talhanation.smallships.world.entity.ship.GalleonEntity;
 import com.talhanation.smallships.world.entity.ship.RowBoatEntity;
 import dev.architectury.injectables.annotations.ExpectPlatform;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -22,6 +23,7 @@ public class ModItems {
     public static final Map<Boat.Type, Item> COG_ITEMS = new HashMap<>(Boat.Type.values().length);
     public static final Map<Boat.Type, Item> BRIGG_ITEMS = new HashMap<>(Boat.Type.values().length);
     public static final Map<Boat.Type, Item> GALLEY_ITEMS = new HashMap<>(Boat.Type.values().length);
+    public static final Map<Boat.Type, Item> GALLEON_ITEMS = new HashMap<>(Boat.Type.values().length);
     public static final Map<Boat.Type, Item> DRAKKAR_ITEMS = new HashMap<>(Boat.Type.values().length);
     public static final Map<Boat.Type, Item> ROWBOAT_ITEMS = new HashMap<>(Boat.Type.values().length);
 
@@ -31,6 +33,7 @@ public class ModItems {
             COG_ITEMS.put(type, getItem(type.getName() + "_" + CogEntity.ID));
             BRIGG_ITEMS.put(type, getItem(type.getName() + "_" + BriggEntity.ID));
             GALLEY_ITEMS.put(type, getItem(type.getName() + "_" + GalleyEntity.ID));
+            GALLEON_ITEMS.put(type, getItem(type.getName() + "_" + GalleonEntity.ID));
             DRAKKAR_ITEMS.put(type, getItem(type.getName() + "_" + DrakkarEntity.ID));
             ROWBOAT_ITEMS.put(type, getItem(type.getName() + "_" + RowBoatEntity.ID));
         }

@@ -53,6 +53,12 @@ public class SmallShipsConfig {
         public static ForgeConfigSpec.DoubleValue shipGeneralDespawnTimeSunken;
         public static ForgeConfigSpec.DoubleValue shipGeneralCannonDamage;
         public static ForgeConfigSpec.DoubleValue shipGeneralCannonDestruction;
+        public static ForgeConfigSpec.BooleanValue pirateShipsEnabled;
+        public static ForgeConfigSpec.IntValue pirateShipsSpawnInterval;
+        public static ForgeConfigSpec.DoubleValue pirateShipsSpawnChance;
+        public static ForgeConfigSpec.IntValue pirateShipsMaxNearby;
+        public static ForgeConfigSpec.DoubleValue pirateShipsDetectionRange;
+        public static ForgeConfigSpec.DoubleValue pirateShipsDespawnDistance;
         public static ForgeConfigSpec.DoubleValue shipAttributeCogMaxHealth;
         public static ForgeConfigSpec.DoubleValue shipAttributeCogMaxSpeed;
         public static ForgeConfigSpec.DoubleValue shipAttributeCogMaxReverseSpeed;
@@ -180,6 +186,34 @@ public class SmallShipsConfig {
         builder.comment("Amount of destruction a cannonball does when hit the ground.");
         Common.shipGeneralCannonDestruction = builder
                 .defineInRange("shipGeneralCannonDestruction", 1.0D, 0.0D, 100.0D);
+
+        builder.pop();
+
+        builder.comment("Settings for naturally spawning hostile pirate ships.");
+        builder.push("AI Pirate Ships");
+
+        Common.pirateShipsEnabled = builder
+                .define("pirateShipsEnabled", true);
+
+        builder.comment("Number of ticks between natural pirate ship spawn checks.");
+        Common.pirateShipsSpawnInterval = builder
+                .defineInRange("pirateShipsSpawnInterval", 1200, 100, 72000);
+
+        builder.comment("Chance per eligible player for a pirate ship to spawn during a spawn check.");
+        Common.pirateShipsSpawnChance = builder
+                .defineInRange("pirateShipsSpawnChance", 0.35D, 0.0D, 1.0D);
+
+        builder.comment("Maximum number of pirate ships near one player.");
+        Common.pirateShipsMaxNearby = builder
+                .defineInRange("pirateShipsMaxNearby", 2, 0, 16);
+
+        builder.comment("Distance at which pirate ships detect and attack players at sea.");
+        Common.pirateShipsDetectionRange = builder
+                .defineInRange("pirateShipsDetectionRange", 72.0D, 8.0D, 256.0D);
+
+        builder.comment("Pirate ships farther than this from every player eventually despawn.");
+        Common.pirateShipsDespawnDistance = builder
+                .defineInRange("pirateShipsDespawnDistance", 192.0D, 32.0D, 512.0D);
 
         builder.pop();
 

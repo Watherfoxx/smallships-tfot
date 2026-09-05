@@ -17,6 +17,7 @@ import net.minecraft.client.model.ShieldModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
@@ -54,6 +55,7 @@ import java.util.stream.Stream;
 import static net.minecraft.client.renderer.entity.MobRenderer.addVertexPair;
 
 public abstract class  ShipRenderer<T extends Ship> extends EntityRenderer<T> {
+    private static final ResourceLocation GHOST_SHIP_TEXTURE = new ResourceLocation("smallships", "textures/entity/ship/ghost.png");
     protected final Map<Boat.Type, Pair<ResourceLocation, ShipModel<T>>> boatResources;
 
     public ShipRenderer(EntityRendererProvider.Context context) {
@@ -73,11 +75,16 @@ public abstract class  ShipRenderer<T extends Ship> extends EntityRenderer<T> {
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(@NotNull T shipEntity) {
+        if (shipEntity.isGhostShip()) {
+            return GHOST_SHIP_TEXTURE;
+        }
         return this.boatResources.get(shipEntity.getVariant()).getFirst();
     }
 
     @Override
     public void render(T shipEntity, float entityYaw, float partialTicks, @NotNull PoseStack poseStack, @NotNull MultiBufferSource multiBufferSource, int packedLight) {
+        boolean ghostShip = shipEntity.isGhostShip();
+        int renderLight = ghostShip ? LightTexture.FULL_BRIGHT : packedLight;
         Attributes shipAttributes = shipEntity.getAttributes();
         float h = ((float) shipEntity.getHurtTime() - partialTicks) / ((shipAttributes.maxHealth * shipEntity.getBbWidth()) / 40.0F);
         float j = shipEntity.getDamage() - partialTicks;
@@ -111,24 +118,31 @@ public abstract class  ShipRenderer<T extends Ship> extends EntityRenderer<T> {
         shipModel.setupAnim(shipEntity, partialTicks, 0.0F, -0.1F, 0.0F, 0.0F);
 
         if (shipEntity instanceof Cannonable cannonShipEntity) {
-            renderCannon(cannonShipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+            renderCannon(cannonShipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, renderLight);
         }
         if (shipEntity instanceof Bannerable bannerShipEntity) {
-            renderBanner(bannerShipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+            renderBanner(bannerShipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, renderLight);
         }
         if (shipEntity instanceof Paddleable paddleShipEntity) {
-            renderPaddle(paddleShipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+            renderPaddle(paddleShipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, renderLight);
         }
         if (shipEntity instanceof Sailable sailShipEntity) {
-            renderSail(sailShipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+            renderSail(sailShipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, renderLight);
         }
         if (shipEntity instanceof Shieldable shieldShipEntity) {
-            renderShields(shieldShipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
+            renderShields(shieldShipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, renderLight);
         }
 
 
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(shipModel.renderType(resourceLocation));
-        shipModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        resourceLocation = this.getTextureLocation(shipEntity);
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(ghostShip
+                ? RenderType.entityTranslucent(resourceLocation)
+                : shipModel.renderType(resourceLocation));
+        shipModel.renderToBuffer(poseStack, vertexConsumer, renderLight, OverlayTexture.NO_OVERLAY,
+                ghostShip ? 0.72F : 1.0F,
+                ghostShip ? 1.0F : 1.0F,
+                ghostShip ? 0.95F : 1.0F,
+                ghostShip ? 0.82F : 1.0F);
         poseStack.popPose();
 
         super.render(shipEntity, entityYaw, partialTicks, poseStack, multiBufferSource, packedLight);
@@ -146,14 +160,26 @@ public abstract class  ShipRenderer<T extends Ship> extends EntityRenderer<T> {
 
             poseStack.pushPose();
             poseStack.mulPose(Axis.YN.rotationDegrees(this.getCannonAngleOffset() + cannon.getAngle()));
-            poseStack.translate(cannon.isRightSided() ? -cannon.getOffsetX() : cannon.getOffsetX(), -cannon.getOffsetY() + getCannonHeightOffset(), -cannon.getOffsetZ());
+            float positionScale = this.getCannonRenderPositionScale();
+            poseStack.translate(
+                    this.getRenderedCannonLateralOffset(cannon) * positionScale,
+                    (-cannon.getOffsetY() + getCannonHeightOffset()) * positionScale,
+                    -cannon.getOffsetZ() * positionScale);
 
             poseStack.scale(0.6F, 0.6F, 0.6F);
 
             CannonModel cannonModel = new CannonModel();
             cannonModel.setupAnim((T)cannonShipEntity, partialTicks, 0.0F, -0.1F, 0.0F, 0.0F);
-            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(cannonModel.renderType(cannonShipEntity.getTextureLocation()));
-            cannonModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+            boolean ghostShip = cannonShipEntity.self().isGhostShip();
+            ResourceLocation cannonTexture = cannonShipEntity.getTextureLocation();
+            VertexConsumer vertexConsumer = multiBufferSource.getBuffer(ghostShip
+                    ? RenderType.entityTranslucent(cannonTexture)
+                    : cannonModel.renderType(cannonTexture));
+            cannonModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY,
+                    ghostShip ? 0.55F : 1.0F,
+                    ghostShip ? 0.95F : 1.0F,
+                    ghostShip ? 0.9F : 1.0F,
+                    ghostShip ? 0.78F : 1.0F);
             poseStack.popPose();
         }
     }
@@ -174,6 +200,15 @@ public abstract class  ShipRenderer<T extends Ship> extends EntityRenderer<T> {
      *********************************************************/
     protected float getCannonHeightOffset(){
         return 0;
+    }
+
+    /** Cancels renderer model scaling for ships authored directly in world proportions. */
+    protected float getCannonRenderPositionScale() {
+        return 1.0F;
+    }
+
+    protected double getRenderedCannonLateralOffset(Cannon cannon) {
+        return cannon.isRightSided() ? -cannon.getOffsetX() : cannon.getOffsetX();
     }
 
     private static final ModelPart bannerModel;
@@ -255,6 +290,7 @@ public abstract class  ShipRenderer<T extends Ship> extends EntityRenderer<T> {
     static {
         sailModels.put(CogEntity.class, new CogSailModel());
         sailModels.put(BriggEntity.class, new BriggSailModel());
+        sailModels.put(GalleonEntity.class, new GalleonSailModel());
         sailModels.put(GalleyEntity.class, new GalleySailModel());
         sailModels.put(DrakkarEntity.class, new DrakkarSailModel());
     }
@@ -262,8 +298,16 @@ public abstract class  ShipRenderer<T extends Ship> extends EntityRenderer<T> {
     private void renderSail(Sailable sailShipEntity, float entityYaw, float partialTicks, PoseStack poseStack, @NotNull MultiBufferSource multiBufferSource, int packedLight) {
         SailModel sailModel = sailModels.get(sailShipEntity.getClass());
         sailModel.setupAnim(((T)sailShipEntity), partialTicks, 0.0F, -0.1F, 0.0F, 0.0F);
-        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(sailModel.renderType(SailModel.getSailColor(sailShipEntity.self().getData(Ship.SAIL_COLOR)).location));
-        sailModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+        ResourceLocation sailTexture = SailModel.getSailColor(sailShipEntity.self().getData(Ship.SAIL_COLOR)).location;
+        boolean ghostShip = sailShipEntity.self().isGhostShip();
+        VertexConsumer vertexConsumer = multiBufferSource.getBuffer(ghostShip
+                ? RenderType.entityTranslucent(sailTexture)
+                : sailModel.renderType(sailTexture));
+        sailModel.renderToBuffer(poseStack, vertexConsumer, packedLight, OverlayTexture.NO_OVERLAY,
+                ghostShip ? 0.7F : 1.0F,
+                ghostShip ? 1.0F : 1.0F,
+                ghostShip ? 0.95F : 1.0F,
+                ghostShip ? 0.78F : 1.0F);
     }
 
     @SuppressWarnings("SimplifiableConditionalExpression")

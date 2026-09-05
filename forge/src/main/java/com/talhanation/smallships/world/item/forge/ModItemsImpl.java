@@ -5,6 +5,7 @@ import com.talhanation.smallships.world.entity.ship.BriggEntity;
 import com.talhanation.smallships.world.entity.ship.CogEntity;
 import com.talhanation.smallships.world.entity.ship.DrakkarEntity;
 import com.talhanation.smallships.world.entity.ship.GalleyEntity;
+import com.talhanation.smallships.world.entity.ship.GalleonEntity;
 import com.talhanation.smallships.world.entity.ship.RowBoatEntity;
 import com.talhanation.smallships.world.item.*;
 import net.minecraft.core.registries.Registries;
@@ -26,6 +27,7 @@ public class ModItemsImpl {
     private static final int DEFAULT_COG_DURABILITY = 150;
     private static final int DEFAULT_BRIGG_DURABILITY = 300;
     private static final int DEFAULT_GALLEY_DURABILITY = 250;
+    private static final int DEFAULT_GALLEON_DURABILITY = 1350;
     private static final int DEFAULT_DRAKKAR_DURABILITY = 200;
     private static final int DEFAULT_ROWBOAT_DURABILITY = 125;
     private static final Map<String, RegistryObject<Item>> entries = new HashMap<>();
@@ -51,6 +53,7 @@ public class ModItemsImpl {
             register(new ResourceLocation(type.getName()).getPath() + "_" + CogEntity.ID,  () -> new CogItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_COG_DURABILITY)));
             register(new ResourceLocation(type.getName()).getPath() + "_" + BriggEntity.ID,  () -> new BriggItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_BRIGG_DURABILITY)));
             register(new ResourceLocation(type.getName()).getPath() + "_" + GalleyEntity.ID,  () -> new GalleyItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_GALLEY_DURABILITY)));
+            register(new ResourceLocation(type.getName()).getPath() + "_" + GalleonEntity.ID, () -> new GalleonItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_GALLEON_DURABILITY)));
             register(new ResourceLocation(type.getName()).getPath() + "_" + DrakkarEntity.ID,  () -> new DrakkarItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_DRAKKAR_DURABILITY)));
             register(new ResourceLocation(type.getName()).getPath() + "_" + RowBoatEntity.ID,  () -> new RowBoatItem(type, new Item.Properties().stacksTo(1).durability(DEFAULT_ROWBOAT_DURABILITY)));
         }

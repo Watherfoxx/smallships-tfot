@@ -88,7 +88,7 @@ public class Cannon extends Entity { // why is this an entity??
         }
     }
 
-    public void trigger(Vec3 shootVec, double yShootVec, LivingEntity driverEntity, double speed, double accuracy) {
+    public void trigger(Vec3 shootVec, double yShootVec, Entity driverEntity, double speed, double accuracy) {
         if (coolDown == 0) {
             if (time > 0) time--;
 
@@ -101,17 +101,17 @@ public class Cannon extends Entity { // why is this an entity??
     }
 
     public void updatePosition(){
-        Vec3 forward = this.ship.getForward();
-        float x0 = 0; // /-/rechst /+/links //no need
-
-        double f0 = (Math.cos(this.ship.getYRot() * ((float)Math.PI / 180F)) * x0);
-        double f1 = (Math.sin(this.ship.getYRot() * ((float)Math.PI / 180F)) * x0);
-        double f2 = this.getOffsetX(); // /-/vorne /+/zurück
-        double d1 = this.ship.getX() - forward.x * f2 + f0;
-        double d2 = this.ship.getY() - forward.y + this.getOffsetY();//hoch
-        double d3 = this.ship.getZ() - forward.z * f2 + f1;
-
-        this.moveTo(d1, d2, d3);
+        // CannonPosition uses X as the distance from the centre line and Z as
+        // the longitudinal position. Keep the projectile origin on the same
+        // hardpoint as the rendered cannon, including the port/starboard side.
+        double lateralOffset = this.isRightSided ? -this.offsetX : this.offsetX;
+        Vec3 localPosition = new Vec3(-this.offsetZ, this.offsetY, lateralOffset);
+        Vec3 rotatedPosition = localPosition.yRot(-this.ship.getYRot() * ((float) Math.PI / 180.0F) - ((float) Math.PI / 2.0F));
+        this.moveTo(
+                this.ship.getX() + rotatedPosition.x,
+                this.ship.getY() + rotatedPosition.y,
+                this.ship.getZ() + rotatedPosition.z
+        );
     }
 
     private void resetTimer() {
@@ -136,9 +136,11 @@ public class Cannon extends Entity { // why is this an entity??
         this.shoot(shootVec, yShootVec, driverEntity, speed, accuracy);
     }
 
-    public void shoot(Vec3 shootVec, double yShootVec, LivingEntity driverEntity, double speed, double accuracy) {
+    public void shoot(Vec3 shootVec, double yShootVec, Entity driverEntity, double speed, double accuracy) {
         if (shootVec != null) {
-            CannonBallEntity cannonBallEntity = new CannonBallEntity(this.level, driverEntity, this.getX(), this.getY() + 1, this.getZ());
+            CannonBallEntity cannonBallEntity = driverEntity instanceof LivingEntity livingEntity
+                    ? new CannonBallEntity(this.level, livingEntity, this.getX(), this.getY() + 1, this.getZ())
+                    : new CannonBallEntity(this.level, driverEntity, this.getX(), this.getY() + 1, this.getZ());
             cannonBallEntity.shoot(shootVec.x(), yShootVec, shootVec.z(), (float) speed, (float) accuracy);
             this.level.addFreshEntity(cannonBallEntity);
             ship.playSound(SoundEvents.TNT_PRIMED, 1.0F, 1.0F / (0.4F + 1.2F) + 0.5F);
@@ -213,6 +215,18 @@ public class Cannon extends Entity { // why is this an entity??
         } else {
             return isLeftSided && Objects.equals(shootVec, VecLeft);
         }
+    }
+
+    public boolean canShootDirection(Vec3 shootVec) {
+        Vec3 forward = ship.getForward().normalize();
+        Vec3 right = forward.yRot(-(float) Math.PI / 2.0F).normalize();
+        Vec3 left = forward.yRot((float) Math.PI / 2.0F).normalize();
+        Vec3 normalizedShootVec = shootVec.normalize();
+
+        if (isRightSided && normalizedShootVec.dot(right) > normalizedShootVec.dot(left)) {
+            return true;
+        }
+        return isLeftSided && normalizedShootVec.dot(left) > normalizedShootVec.dot(right);
     }
 
     public CompoundTag getData(){

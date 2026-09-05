@@ -40,6 +40,12 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
         this.moveTo(d1, d2, d3, this.getYRot(), this.getXRot());
     }
 
+    public AbstractCannonBall(EntityType<? extends AbstractCannonBall> type, Entity owner, double d1, double d2, double d3, Level world) {
+        super(type, world);
+        this.setOwner(owner);
+        this.moveTo(d1, d2, d3, this.getYRot(), this.getXRot());
+    }
+
     @Override
     public void tick() {
         this.baseTick();

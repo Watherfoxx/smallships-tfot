@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","group":"galleon","pattern":["sls","pcp","ppp"],"key":{"s":{"item":"smallships:sail"},"l":{"item":"minecraft:lead"},"p":{"item":"minecraft:cherry_planks"},"c":{"item":"smallships:cherry_brigg"}},"result":{"item":"smallships:cherry_galleon"}}

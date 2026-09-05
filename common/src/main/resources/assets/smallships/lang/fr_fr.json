@@ -1,4 +1,6 @@
 {
+  "entity.smallships.pirate_ship": "Navire fantôme",
+  "entity.smallships.pirate_captain": "Capitaine fantôme",
   "category.smallships" : "Bateaux",
   "itemGroup.smallships.smallships": "Small Ships",
   "key.smallships.ship_sail": "Déployer / replier la voile",
@@ -96,6 +98,17 @@
   "item.smallships.cherry_brigg": "Brigantin",
   "item.smallships.bamboo_brigg": "Brigantin",
 
+  "entity.smallships.galleon": "Galion",
+  "item.smallships.oak_galleon": "Galion en chêne",
+  "item.smallships.spruce_galleon": "Galion en sapin",
+  "item.smallships.birch_galleon": "Galion en bouleau",
+  "item.smallships.jungle_galleon": "Galion en acajou",
+  "item.smallships.acacia_galleon": "Galion en acacia",
+  "item.smallships.dark_oak_galleon": "Galion en chêne noir",
+  "item.smallships.mangrove_galleon": "Galion en palétuvier",
+  "item.smallships.cherry_galleon": "Galion en cerisier",
+  "item.smallships.bamboo_galleon": "Galion en bambou",
+
   "tooltip.plane.damage": "Dégâts : %s %%",
   "tooltip.plane.throttle": "Accélération : %s %%",
   "tooltip.plane.speed": "Vitesse : %s",
@@ -108,5 +121,8 @@
   "subtitles.smallships.sail_move": "Voiles qui se déploient",
   "subtitles.smallships.sail_pull": "Voiles qui se tendent",
   "subtitles.smallships.cannon_shot": "Coup de canon",
-  "subtitles.smallships.ship_hit": "Navire touché"
+  "subtitles.smallships.ship_hit": "Navire touché",
+
+  "message.smallships.ship.not_owner": "Vous n'êtes pas le propriétaire de ce bateau.",
+  "message.smallships.ship.owner_pickup_hint": "Sneak + clic gauche pour récupérer votre bateau."
 }

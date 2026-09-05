@@ -6,6 +6,7 @@ import com.talhanation.smallships.world.entity.ship.BriggEntity;
 import com.talhanation.smallships.world.entity.ship.CogEntity;
 import com.talhanation.smallships.world.entity.ship.DrakkarEntity;
 import com.talhanation.smallships.world.entity.ship.GalleyEntity;
+import com.talhanation.smallships.world.entity.ship.GalleonEntity;
 import com.talhanation.smallships.world.entity.ship.RowBoatEntity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.Registry;
@@ -57,6 +58,15 @@ public class ModEntityTypesImpl {
                 .create(MobCategory.MISC, GalleyEntity::new)
                 .dimensions(EntityDimensions.fixed(3.5F, 1.25F))
                 .trackedUpdateRate(10)
+                .forceTrackedVelocityUpdates(true)
+                .build()));
+
+        entries.put(GalleonEntity.class, register(GalleonEntity.ID, FabricEntityTypeBuilder
+                .create(MobCategory.MISC, GalleonEntity::new)
+                // Vanilla boat buoyancy becomes unstable with an 8-block box;
+                // the full 34x8 hull is handled by GalleonEntity's volumes.
+                .dimensions(EntityDimensions.fixed(3.5F, 1.25F))
+                .trackedUpdateRate(3)
                 .forceTrackedVelocityUpdates(true)
                 .build()));
 

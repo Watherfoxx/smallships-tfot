@@ -29,7 +29,8 @@ public abstract class SailModel extends EntityModel<Ship> {
         BROWN(new ResourceLocation(SmallShipsMod.MOD_ID,"textures/entity/sail/brown_sail.png")),
         GREEN(new ResourceLocation(SmallShipsMod.MOD_ID,"textures/entity/sail/green_sail.png")),
         RED(new ResourceLocation(SmallShipsMod.MOD_ID,"textures/entity/sail/red_sail.png")),
-        BLACK(new ResourceLocation(SmallShipsMod.MOD_ID,"textures/entity/sail/black_sail.png"));
+        BLACK(new ResourceLocation(SmallShipsMod.MOD_ID,"textures/entity/sail/black_sail.png")),
+        GHOST(new ResourceLocation(SmallShipsMod.MOD_ID,"textures/entity/sail/ghost_sail.png"));
 
         public final ResourceLocation location;
 

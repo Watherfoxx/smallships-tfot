@@ -8,6 +8,7 @@ import com.talhanation.smallships.mixin.controlling.BoatAccessor;
 import com.talhanation.smallships.network.ModPackets;
 import com.talhanation.smallships.world.entity.projectile.Cannon;
 import com.talhanation.smallships.world.entity.ship.abilities.*;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -49,6 +50,8 @@ import java.util.Stack;
 import java.util.UUID;
 
 public abstract class Ship extends Boat {
+    private static final Component NOT_OWNER_MESSAGE = Component.translatable("message.smallships.ship.not_owner").withStyle(ChatFormatting.RED);
+    private static final Component OWNER_PICKUP_HINT_MESSAGE = Component.translatable("message.smallships.ship.owner_pickup_hint").withStyle(ChatFormatting.RED);
     public static final EntityDataAccessor<CompoundTag> ATTRIBUTES = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.COMPOUND_TAG);
     public static final EntityDataAccessor<Float> SPEED = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> ROT_SPEED = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.FLOAT);
@@ -63,6 +66,7 @@ public abstract class Ship extends Boat {
     private static final EntityDataAccessor<Boolean> LEFT = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> RIGHT = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SUNKEN = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> GHOST_SHIP = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
     public static final EntityDataAccessor<CompoundTag> SHIELD_DATA = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.COMPOUND_TAG);
     private boolean isLocked = false;
     private int sunkenTime = 0;
@@ -81,6 +85,17 @@ public abstract class Ship extends Boat {
     private CameraType previousCameraType;
     @Nullable
     private UUID lastDriverUuid;
+    @Nullable
+    private UUID ownerUuid;
+    private boolean aiControlled;
+    boolean aiLootDropped;
+    int aiTicksWithoutNearbyPlayer;
+    int aiPatrolTicks;
+    float aiPatrolYaw;
+    int aiState;
+    int aiStateTicks;
+    int aiCombatIdleTicks;
+    double aiSurfaceY;
 
     public Ship(EntityType<? extends Boat> entityType, Level level) {
         super(entityType, level);
@@ -93,6 +108,10 @@ public abstract class Ship extends Boat {
     @Override
     public void tick() {
         super.tick();
+
+        if (!this.level().isClientSide && this.aiControlled && !this.isRemoved()) {
+            PirateShipAi.tick(this);
+        }
 
         this.syncSailStateWithDriver();
 
@@ -136,8 +155,7 @@ public abstract class Ship extends Boat {
 
         if (!Objects.equals(this.lastDriverUuid, currentDriverUuid)) {
             if (sailShip.getSailState() != 0) {
-                sailShip.setSailState((byte) 0);
-                sailShip.playSailSound(0);
+                this.closeSails();
             }
             this.lastDriverUuid = currentDriverUuid;
         }
@@ -178,6 +196,7 @@ public abstract class Ship extends Boat {
         this.getEntityData().define(LEFT, false);
         this.getEntityData().define(RIGHT, false);
         this.getEntityData().define(SUNKEN, false);
+        this.getEntityData().define(GHOST_SHIP, false);
 
         if (this instanceof Sailable sailShip) sailShip.defineSailShipSynchedData();
         if (this instanceof Bannerable bannerShip) bannerShip.defineBannerShipSynchedData();
@@ -200,6 +219,18 @@ public abstract class Ship extends Boat {
 
         this.setSunken(tag.getBoolean("Sunken"));
         this.isLocked = (tag.getBoolean("locked"));
+        this.ownerUuid = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
+        this.aiControlled = tag.getBoolean("PirateShip");
+        this.getEntityData().set(GHOST_SHIP, this.aiControlled);
+        this.aiLootDropped = tag.getBoolean("PirateLootDropped");
+        this.aiTicksWithoutNearbyPlayer = tag.getInt("PirateTicksWithoutPlayer");
+        this.aiState = tag.getInt("PirateState");
+        this.aiStateTicks = tag.getInt("PirateStateTicks");
+        this.aiCombatIdleTicks = tag.getInt("PirateCombatIdleTicks");
+        this.aiSurfaceY = tag.getDouble("PirateSurfaceY");
+        if (this.aiControlled) {
+            this.isLocked = true;
+        }
     }
 
     @Override
@@ -217,6 +248,16 @@ public abstract class Ship extends Boat {
 
         tag.putBoolean("Sunken", isSunken());
         tag.putBoolean("locked", this.isLocked);
+        if (this.ownerUuid != null) {
+            tag.putUUID("Owner", this.ownerUuid);
+        }
+        tag.putBoolean("PirateShip", this.aiControlled);
+        tag.putBoolean("PirateLootDropped", this.aiLootDropped);
+        tag.putInt("PirateTicksWithoutPlayer", this.aiTicksWithoutNearbyPlayer);
+        tag.putInt("PirateState", this.aiState);
+        tag.putInt("PirateStateTicks", this.aiStateTicks);
+        tag.putInt("PirateCombatIdleTicks", this.aiCombatIdleTicks);
+        tag.putDouble("PirateSurfaceY", this.aiSurfaceY);
     }
 
     public void onAboveBubbleCol(boolean bl) {
@@ -279,7 +320,7 @@ public abstract class Ship extends Boat {
                 updateControls(((BoatAccessor) this).isInputUp(),((BoatAccessor) this).isInputDown(), ((BoatAccessor) this).isInputLeft(), ((BoatAccessor) this).isInputRight(), player);
         }
 
-        if(this.isInWater() && !this.isShipLeashed() && !this.isSunken() && !isLocked()){
+        if(this.isInWater() && !this.isShipLeashed() && !this.isSunken() && (!isLocked() || this.aiControlled)){
             if(this instanceof Paddleable && this instanceof Sailable sailShip){
                 if(isForward() && getDriver() != null){
                     setPoint = (maxSpeed * 12/16F) * (1 + (1 + sailShip.getSailState()) * 0.1F);
@@ -333,8 +374,14 @@ public abstract class Ship extends Boat {
                 if (this instanceof Sailable sailShip) sailShip.controlBoatSailShip();
                 if (this instanceof Paddleable paddleShip) paddleShip.controlBoatPaddleShip();
             }
-            //SET
-            setDeltaMovement(Kalkuel.calculateMotionX(this.getSpeed(), this.getYRot()), getDeltaMovement().y, Kalkuel.calculateMotionZ(this.getSpeed(), this.getYRot()));
+            double motionX = Kalkuel.calculateMotionX(this.getSpeed(), this.getYRot());
+            double motionZ = Kalkuel.calculateMotionZ(this.getSpeed(), this.getYRot());
+            if (this.canMoveIntoLoadedChunks(motionX, motionZ)) {
+                this.setDeltaMovement(motionX, this.getDeltaMovement().y, motionZ);
+            }
+            else {
+                this.stopAtUnloadedChunk();
+            }
         }
         else {
             setForward(false);
@@ -342,6 +389,40 @@ public abstract class Ship extends Boat {
             setLeft(false);
             setRight(false);
         }
+    }
+
+    protected boolean canMoveIntoLoadedChunks(double motionX, double motionZ) {
+        AABB sweptBounds = this.getNavigationBounds().expandTowards(motionX, 0.0D, motionZ);
+        int minChunkX = Mth.floor(sweptBounds.minX) >> 4;
+        int maxChunkX = Mth.floor(sweptBounds.maxX - 1.0E-7D) >> 4;
+        int minChunkZ = Mth.floor(sweptBounds.minZ) >> 4;
+        int maxChunkZ = Mth.floor(sweptBounds.maxZ - 1.0E-7D) >> 4;
+
+        for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                if (!this.level().getChunkSource().hasChunk(chunkX, chunkZ)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Bounds used to keep the complete ship inside loaded chunks. Large ships
+     * override this without having to inflate their square vanilla hitbox.
+     */
+    protected AABB getNavigationBounds() {
+        return this.getBoundingBox();
+    }
+
+    private void stopAtUnloadedChunk() {
+        this.setSpeed(0.0F);
+        this.setRotSpeed(0.0F);
+        this.setPoint = 0.0F;
+        ((BoatAccessor) this).setDeltaRotation(0.0F);
+        this.setDeltaMovement(0.0D, this.getDeltaMovement().y, 0.0D);
     }
 
     public boolean isLocked(){
@@ -471,6 +552,12 @@ public abstract class Ship extends Boat {
         if (hasPlayerPassenger) {
             return InteractionResult.PASS;
         }
+        if (!this.canPlayerPickupShip(player)) {
+            if (!this.level().isClientSide) {
+                player.sendSystemMessage(NOT_OWNER_MESSAGE);
+            }
+            return InteractionResult.FAIL;
+        }
         if (this.level().isClientSide) {
             return InteractionResult.SUCCESS;
         }
@@ -481,6 +568,39 @@ public abstract class Ship extends Boat {
         }
         this.discard();
         return InteractionResult.SUCCESS;
+    }
+
+    private boolean canPlayerPickupShip(Player player) {
+        return !this.aiControlled && (this.isOwner(player) || this.hasNoDurability());
+    }
+
+    private boolean isOwner(Player player) {
+        return this.ownerUuid == null || player.getUUID().equals(this.ownerUuid);
+    }
+
+    private boolean hasNoDurability() {
+        return this.getDamage() >= this.getAttributes().maxHealth;
+    }
+
+    public void setOwner(@Nullable Player player) {
+        this.ownerUuid = player != null ? player.getUUID() : null;
+    }
+
+    public boolean isAiControlled() {
+        return this.aiControlled;
+    }
+
+    public boolean isGhostShip() {
+        return this.getEntityData().get(GHOST_SHIP);
+    }
+
+    public void setAiControlled(boolean aiControlled) {
+        this.aiControlled = aiControlled;
+        this.getEntityData().set(GHOST_SHIP, aiControlled);
+        if (aiControlled) {
+            this.isLocked = true;
+            this.ownerUuid = null;
+        }
     }
 
     private ItemStack createShipItemStack() {
@@ -582,6 +702,30 @@ public abstract class Ship extends Boat {
         super.removePassenger(entity);
     }
 
+    public void stopShipFromDisconnectedDriver(Player player) {
+        if (!player.equals(this.getControllingPassenger())) {
+            return;
+        }
+
+        this.setForward(false);
+        this.setBackward(false);
+        this.setLeft(false);
+        this.setRight(false);
+        this.setSpeed(0.0F);
+        this.setRotSpeed(0.0F);
+        this.setPoint = 0.0F;
+        ((BoatAccessor) this).setDeltaRotation(0.0F);
+        this.setDeltaMovement(0.0D, this.getDeltaMovement().y, 0.0D);
+        this.lastDriverUuid = null;
+        this.closeSails();
+    }
+
+    private void closeSails() {
+        if (this instanceof Sailable sailShip && sailShip.getSailState() != 0) {
+            sailShip.setSailState((byte) 0);
+        }
+    }
+
     public void setSunken(boolean sunken){
         this.entityData.set(SUNKEN, sunken);
     }
@@ -647,20 +791,28 @@ public abstract class Ship extends Boat {
     protected void waterSplash() {}
 
     private void updateShipAmbience(boolean isSwimming) {
-        if (isSwimming) {
-            if (this.isInWater()) {
+        if (!isSwimming || !this.isInWater()) {
+            return;
+        }
+
+        if (this.level().isClientSide()) {
+            if (this.tickCount % 2 == 0) {
                 waterSplash();
-                this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_SWIM, this.getSoundSource(), 0.05F, 0.8F + 0.4F * this.random.nextFloat());
             }
+        } else if (this.tickCount % 10 == 0) {
+            this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.GENERIC_SWIM, this.getSoundSource(), 0.05F, 0.8F + 0.4F * this.random.nextFloat());
         }
     }
 
     private void updateWaterMobs() {
         if(!this.getCommandSenderWorld().isClientSide()){
+            if (this.tickCount % 20 != 0) {
+                return;
+            }
             double radius = SmallShipsConfig.Common.waterAnimalFleeRadius.get();
             List<WaterAnimal> waterAnimals = this.level().getEntitiesOfClass(WaterAnimal.class, new AABB(getX() - radius, getY() - radius, getZ() - radius, getX() + radius, getY() + radius, getZ() + radius));
             for (WaterAnimal waterAnimal : waterAnimals) {
-                if(this.tickCount % 20 == 0) fleeEntity(waterAnimal);
+                fleeEntity(waterAnimal);
             }
         }
     }
@@ -683,14 +835,26 @@ public abstract class Ship extends Boat {
     }
 
     @Override
+    public boolean skipAttackInteraction(@NotNull Entity entity) {
+        if (!this.aiControlled && entity instanceof Player player && player.isCrouching()) {
+            return tryPickupShip(player) != InteractionResult.PASS;
+        }
+        if (!this.aiControlled && !this.level().isClientSide && entity instanceof Player player && this.isOwner(player) && !this.hasNoDurability()) {
+            player.sendSystemMessage(OWNER_PICKUP_HINT_MESSAGE);
+        }
+
+        return super.skipAttackInteraction(entity);
+    }
+
+    @Override
     public boolean hurt(DamageSource damageSource, float f) {
         if (this.isInvulnerableTo(damageSource)) {
             return false;
         }
         else if (!this.getCommandSenderWorld().isClientSide() && !this.isRemoved()) {
-            if (damageSource.getEntity() instanceof Player player && player.isCrouching()) {
+            if (!this.aiControlled && damageSource.getEntity() instanceof Player player && player.isCrouching()) {
                 InteractionResult pickupResult = tryPickupShip(player);
-                if (pickupResult.consumesAction()) {
+                if (pickupResult != InteractionResult.PASS) {
                     return true;
                 }
             }
@@ -803,15 +967,28 @@ public abstract class Ship extends Boat {
     @Override
     public void destroy(@NotNull DamageSource damageSource) {
         if (this.getCommandSenderWorld().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-            ItemStack shipStack = createShipItemStack();
-            if (!shipStack.isEmpty()) {
-                this.spawnAtLocation(shipStack);
+            if (!this.aiControlled) {
+                ItemStack shipStack = createShipItemStack();
+                if (!shipStack.isEmpty()) {
+                    this.spawnAtLocation(shipStack);
+                }
+                if(this instanceof Cannonable cannonableShip) cannonableShip.cannonShipDestroyed(this.getCommandSenderWorld(), this);
             }
             if(this instanceof ContainerShip containerShip) containerShip.chestVehicleDestroyed(damageSource, this.getCommandSenderWorld(), this);
-            if(this instanceof Cannonable cannonableShip) cannonableShip.cannonShipDestroyed(this.getCommandSenderWorld(), this);
         }
 
+        if (this.aiControlled) {
+            PirateCaptain.discard(this);
+        }
         discard();
+    }
+
+    @Override
+    public void remove(@NotNull RemovalReason removalReason) {
+        if (this.aiControlled && !removalReason.shouldSave()) {
+            PirateCaptain.discard(this);
+        }
+        super.remove(removalReason);
     }
 
     public enum BiomeModifierType {

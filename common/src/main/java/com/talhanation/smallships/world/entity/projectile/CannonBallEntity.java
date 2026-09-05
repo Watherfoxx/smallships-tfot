@@ -2,6 +2,7 @@ package com.talhanation.smallships.world.entity.projectile;
 
 
 import com.talhanation.smallships.world.entity.ModEntityTypes;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -18,6 +19,10 @@ public class CannonBallEntity extends AbstractCannonBall {
     }
 
     public CannonBallEntity(Level world, LivingEntity owner, double d1, double d2, double d3) {
+        super(ModEntityTypes.CANNON_BALL, owner, d1, d2, d3, world);
+    }
+
+    public CannonBallEntity(Level world, Entity owner, double d1, double d2, double d3) {
         super(ModEntityTypes.CANNON_BALL, owner, d1, d2, d3, world);
     }
 }

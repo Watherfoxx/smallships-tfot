@@ -12,6 +12,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
@@ -47,6 +48,14 @@ public interface Cannonable extends Ability {
     }
     default void triggerCannonAdvanced(Cannon cannon, Vec3 shootVec, double yShootVec, LivingEntity driverEntity, double speed, double accuracy){
         if(cannon.canShootDirection()) cannon.trigger(shootVec, yShootVec, driverEntity, speed, accuracy);
+    }
+
+    default void triggerAiCannons(Vec3 shootVec, double yShootVec, Entity owner, double speed, double accuracy) {
+        for (Cannon cannon : this.getCannons()) {
+            if (canShoot() && cannon.canShootDirection(shootVec)) {
+                cannon.trigger(shootVec, yShootVec, owner, speed, accuracy);
+            }
+        }
     }
 
     default void defineCannonShipSynchedData() {

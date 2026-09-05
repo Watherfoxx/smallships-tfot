@@ -208,7 +208,7 @@ public abstract class ContainerShip extends Ship implements HasCustomInventorySc
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return this.isChestVehicleStillValid(player);
+        return this.hasPassenger(player) || this.isChestVehicleStillValid(player);
     }
 
     @Override
