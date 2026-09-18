@@ -14,6 +14,7 @@
   "mixins": [
     "container.SimpleContainerAccessor",
     "controlling.BoatAccessor",
+    "controlling.GhostCaptainDeathMixin",
     "controlling.BoatMixin",
     "item.ItemAccessor",
     "leashing.BoatMixin",

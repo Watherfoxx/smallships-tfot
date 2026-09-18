@@ -12,6 +12,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 
 public class ModEntityTypes {
+    public static final EntityType<com.talhanation.smallships.world.entity.ship.GhostCrewEntity> GHOST_CREW =
+            getEntityType(com.talhanation.smallships.world.entity.ship.GhostCrewEntity.class);
     public static final EntityType<CannonBallEntity> CANNON_BALL = getEntityType(CannonBallEntity.class);
     public static final EntityType<CogEntity> COG = getEntityType(CogEntity.class);
     public static final EntityType<BriggEntity> BRIGG = getEntityType(BriggEntity.class);

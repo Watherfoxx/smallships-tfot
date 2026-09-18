@@ -22,6 +22,7 @@ public class ClientModBus {
     @SubscribeEvent
     static void initRegisterRendererRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntityTypes.CANNON_BALL, CannonBallRenderer::new);
+        event.registerEntityRenderer(ModEntityTypes.GHOST_CREW, com.talhanation.smallships.client.renderer.entity.GhostCrewRenderer::new);
 
         event.registerEntityRenderer(ModEntityTypes.COG, CogRenderer::new);
         event.registerEntityRenderer(ModEntityTypes.BRIGG, BriggRenderer::new);

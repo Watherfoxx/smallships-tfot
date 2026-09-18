@@ -24,6 +24,9 @@ public class SmallshipsModForge {
         new SmallShipsMod();
 
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modEventBus.addListener((net.minecraftforge.event.entity.EntityAttributeCreationEvent event) ->
+                event.put(com.talhanation.smallships.world.entity.ModEntityTypes.GHOST_CREW,
+                        net.minecraft.world.entity.monster.Pillager.createAttributes().build()));
 
         ModItemsImpl.ITEMS.register(modEventBus);
         if (hasCustomItemGroup) ModItemsImpl.CREATIVE_MODE_TABS.register(modEventBus);
@@ -32,5 +35,7 @@ public class SmallshipsModForge {
         ModSoundTypesImpl.SOUND_EVENTS.register(modEventBus);
 
         MinecraftForge.EVENT_BUS.register(new PassengerEvents());
+        MinecraftForge.EVENT_BUS.addListener((net.minecraftforge.event.server.ServerStartingEvent event) ->
+                com.talhanation.smallships.config.GhostShipsConfig.onServerStarting());
     }
 }

@@ -3,6 +3,10 @@ package com.talhanation.smallships.world.entity.projectile;
 
 import com.talhanation.smallships.config.SmallShipsConfig;
 import com.talhanation.smallships.world.entity.ship.Ship;
+import com.talhanation.smallships.world.entity.ship.GhostCrewEntity;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.Boat;
 import com.talhanation.smallships.world.sound.ModSoundTypes;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
@@ -25,11 +29,48 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
     public boolean inWater = false;
     public boolean wasShot = false;
     public int counter = 0;
+    private boolean ghostRestrictedDamage;
+    private final Set<UUID> ghostHitEntities = new HashSet<>();
+
+    @Override
+    public void setOwner(Entity owner) {
+        super.setOwner(owner);
+        // Remember the origin even if the captain dies before impact.
+        if (owner instanceof GhostCrewEntity
+                || owner instanceof Ship ship && ship.isAiControlled()
+                || owner != null && owner.getTags().contains("smallships_pirate_captain")) {
+            ghostRestrictedDamage = true;
+        }
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putBoolean("GhostRestrictedDamage", ghostRestrictedDamage);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        ghostRestrictedDamage = tag.getBoolean("GhostRestrictedDamage");
+    }
+
+    private boolean isGhostShot() {
+        // Also recognize pre-existing projectiles whose owner is still available.
+        if (!ghostRestrictedDamage) {
+            Entity owner = getOwner();
+            if (owner != null) setOwner(owner);
+        }
+        return ghostRestrictedDamage;
+    }
 
     protected AbstractCannonBall(EntityType<? extends AbstractCannonBall> type, Level world) {
         super(type, world);
@@ -51,10 +92,17 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
         this.baseTick();
 
         Vec3 vector3d = this.getDeltaMovement();
-        HitResult raytraceresult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
-
-        if (raytraceresult.getType() != HitResult.Type.MISS) {
-            this.onHit(raytraceresult);
+        boolean ghostShot = isGhostShot();
+        // A hull can overlap its passengers. Continue along the same segment after
+        // hitting it, or fast cannonballs can skip the player hidden by that first hit.
+        for (int impacts = 0; impacts < (ghostShot ? 16 : 1); impacts++) {
+            HitResult hit = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
+            if (hit.getType() == HitResult.Type.MISS) break;
+            if (ghostShot && hit instanceof EntityHitResult entityHit) {
+                ghostHitEntities.add(entityHit.getEntity().getUUID());
+            }
+            this.onHit(hit);
+            if (this.isRemoved() || !(hit instanceof EntityHitResult)) break;
         }
 
         double d0 = this.getX() + vector3d.x;
@@ -94,6 +142,14 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
         }
     }
 
+    @Override
+    protected boolean canHitEntity(Entity entity) {
+        // Filter before ray tracing: an immune mob must not hide a player behind it.
+        if (isGhostShot() && (!(entity instanceof Player) && !(entity instanceof Boat)
+                || ghostHitEntities.contains(entity.getUUID()))) return false;
+        return super.canHitEntity(entity);
+    }
+
     public void setWasShot(boolean bool){
         if (bool != wasShot){
             wasShot = true;
@@ -113,6 +169,11 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
 
     @Override
     protected void onHitBlock(BlockHitResult blockHitResult) {
+        if (isGhostShot()) {
+            // No explosion or block callback: neither collateral damage nor triggered TNT.
+            if (!this.level().isClientSide()) this.discard();
+            return;
+        }
         super.onHitBlock(blockHitResult);
         if (!this.level().isClientSide()) {
             boolean doesSpreadFire = false;
@@ -131,10 +192,26 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
 
     @Override
     protected void onHitEntity(EntityHitResult hitResult) {
+        if (isGhostShot() && !(hitResult.getEntity() instanceof Player)
+                && !(hitResult.getEntity() instanceof Boat)) return;
         super.onHitEntity(hitResult);
         if (!this.level().isClientSide()) {
             Entity hitEntity = hitResult.getEntity();
             Entity ownerEntity = this.getOwner();
+
+            if (isGhostShot() && hitEntity instanceof Player player) {
+                float damage = SmallShipsConfig.Common.shipGeneralCannonDamage.get().floatValue();
+                boolean applied = player.hurt(this.damageSources().thrown(this, ownerEntity), damage);
+                if (applied) {
+                    this.level().playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE,
+                            getSoundSource(), 3.3F, 0.8F + 0.4F * random.nextFloat());
+                } else {
+                    com.talhanation.smallships.SmallShipsMod.LOGGER.info(
+                            "Ghost cannon hit player {} but damage was rejected (damage={}, difficulty={}, invulnerable={})",
+                            player.getScoreboardName(), damage, level().getDifficulty(), player.getAbilities().invulnerable);
+                }
+                return;
+            }
 
             // Ne pas infliger de dégâts aux armor stands et item frames
             if (hitEntity instanceof ArmorStand || hitEntity instanceof ItemFrame) {
@@ -147,7 +224,7 @@ public abstract class AbstractCannonBall extends AbstractHurtingProjectile {
             }
             else if (ownerEntity instanceof LivingEntity livingOwnerEntity) {
                 if(ownerEntity.getTeam() != null && ownerEntity.getTeam().isAlliedTo(hitEntity.getTeam()) && !ownerEntity.getTeam().isAllowFriendlyFire()) return;
-                this.doEnchantDamageEffects(livingOwnerEntity, hitEntity);
+                if (!isGhostShot()) this.doEnchantDamageEffects(livingOwnerEntity, hitEntity);
                 this.level().playSound(null, this.getX(), this.getY() + 4 , this.getZ(), SoundEvents.GENERIC_EXPLODE, this.getSoundSource(), 3.3F, 0.8F + 0.4F * this.random.nextFloat());
             }
 

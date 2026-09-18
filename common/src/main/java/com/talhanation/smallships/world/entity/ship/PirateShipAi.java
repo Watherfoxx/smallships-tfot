@@ -10,7 +10,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
-import net.minecraft.world.Containers;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -20,10 +19,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Comparator;
 
 final class PirateShipAi {
-    private static final double MIN_BROADSIDE_DISTANCE = 16.0D;
     private static final double MAX_CANNON_DISTANCE = 56.0D;
     private static final double CANNON_BALL_SPEED = 2.6D;
-    private static final double CANNON_BALL_ACCURACY = 4.0D;
     private static final double CANNON_BALL_DRAG = 0.99D;
     private static final double CANNON_BALL_GRAVITY = 0.06D;
     private static final double MAX_TARGET_SPEED = 1.0D;
@@ -33,9 +30,8 @@ final class PirateShipAi {
     private static final int STATE_ACTIVE = 0;
     private static final int STATE_EMERGING = 1;
     private static final int STATE_DIVING = 2;
-    private static final int EMERGENCE_TICKS = 20 * 5 / 2;
+    private static final int EMERGENCE_TICKS = 20 * 4;
     private static final int DIVE_TICKS = 20 * 3;
-    private static final int COMBAT_IDLE_TIMEOUT = 20 * 20;
 
     private PirateShipAi() {
     }
@@ -46,7 +42,9 @@ final class PirateShipAi {
         }
 
         if (ship.isSunken()) {
-            PirateCaptain.tick(ship, null);
+            ship.setGhostPitch(0.0F);
+            // Also handles passengers restored after loading an already sunken ship.
+            PirateCaptain.disappearInSmoke(ship);
             dropCargo(ship, level);
             stop(ship);
             return;
@@ -63,10 +61,10 @@ final class PirateShipAi {
             return;
         }
 
-        double detectionRange = SmallShipsConfig.Common.pirateShipsDetectionRange.get();
+        double detectionRange = com.talhanation.smallships.config.GhostShipsConfig.general().detectionRange;
         Player target = findNearestPlayer(level, ship, detectionRange, true);
         if (target == null) {
-            if (++ship.aiCombatIdleTicks >= COMBAT_IDLE_TIMEOUT) {
+            if (++ship.aiCombatIdleTicks >= com.talhanation.smallships.config.GhostShipsConfig.forShip(ship).combatIdleSeconds * 20) {
                 beginDive(ship);
                 tickDive(ship, level);
                 PirateCaptain.tick(ship, null);
@@ -86,8 +84,10 @@ final class PirateShipAi {
         ship.aiStateTicks = 0;
         ship.aiCombatIdleTicks = 0;
         ship.aiSurfaceY = surfaceY;
+        ship.setGhostPitch(0.0F);
         ship.setPos(ship.getX(), surfaceY - TRANSITION_DEPTH, ship.getZ());
         stop(ship);
+        if (ship instanceof Sailable sailable) sailable.setSailState((byte) 3);
     }
 
     private static void beginDive(Ship ship) {
@@ -104,15 +104,51 @@ final class PirateShipAi {
         }
 
         double progress = Math.min(++ship.aiStateTicks / (double) EMERGENCE_TICKS, 1.0D);
-        double easedProgress = smoothStep(progress);
-        ship.setPos(ship.getX(), ship.aiSurfaceY - TRANSITION_DEPTH * (1.0D - easedProgress), ship.getZ());
-        stop(ship);
+        // Boat buoyancy balances gravity with about 65% of the hitbox submerged.
+        // The water surface is not the resting height of the entity's bottom.
+        double restingDraft = ship.getBbHeight() * 0.65D;
+        // Rise bow-first, drop onto the water, then settle with a small rebound.
+        double height;
+        double pitch;
+        if (progress < 0.55D) {
+            double rise = smoothStep(progress / 0.55D);
+            height = -TRANSITION_DEPTH + (TRANSITION_DEPTH + 0.55D) * rise;
+            pitch = 28.0D * Math.sin(rise * Math.PI / 2.0D);
+        } else if (progress < 0.8D) {
+            double fall = smoothStep((progress - 0.55D) / 0.25D);
+            height = 0.55D - 0.7D * fall;
+            pitch = 28.0D - 32.0D * fall;
+        } else {
+            double settle = (progress - 0.8D) / 0.2D;
+            height = -restingDraft * smoothStep(settle)
+                    - 0.15D * (1.0D - settle) * Math.cos(settle * Math.PI * 2.0D);
+            pitch = -4.0D * (1.0D - settle) * Math.cos(settle * Math.PI * 2.0D);
+        }
+        ship.setGhostPitch((float) pitch);
+        ship.setPos(ship.getX(), ship.aiSurfaceY + height, ship.getZ());
+        if (ship.aiStateTicks == 64) {
+            level.playSound(null, ship.getX(), ship.aiSurfaceY, ship.getZ(),
+                    SoundEvents.GENERIC_SPLASH, SoundSource.HOSTILE, 3.0F, 0.65F);
+            level.sendParticles(ParticleTypes.SPLASH, ship.getX(), ship.aiSurfaceY, ship.getZ(),
+                    70, ship.getBbWidth() * 0.5D, 0.15D, ship.getBbWidth() * 0.5D, 0.25D);
+        }
+        // Emerge under sail, keeping forward momentum when navigation takes over.
+        float maxSpeed = Math.max(0.0F, ship.getAttributes().maxSpeed / (60.0F * 1.15F) * 0.7F);
+        float speed = Math.min(maxSpeed, (float) (0.03D + 0.08D * smoothStep(progress)));
+        if (!hasWaterAhead(level, ship, ship.getYRot(), 4.0D)) speed = 0.0F;
+        ship.setSpeed(speed);
+        ship.setRotSpeed(0.0F);
+        if (ship instanceof Sailable sailable) sailable.setSailState((byte) 3);
+        // Only vertical velocity is reset: height remains controlled by the animation.
+        ship.setDeltaMovement(Kalkuel.calculateMotionX(speed, ship.getYRot()), 0.0D,
+                Kalkuel.calculateMotionZ(speed, ship.getYRot()));
         spawnTransitionParticles(level, ship, true);
 
         if (progress >= 1.0D) {
             ship.aiState = STATE_ACTIVE;
+            ship.setGhostPitch(0.0F);
             ship.aiStateTicks = 0;
-            ship.setPos(ship.getX(), ship.aiSurfaceY, ship.getZ());
+            ship.setPos(ship.getX(), ship.aiSurfaceY - restingDraft, ship.getZ());
         }
     }
 
@@ -179,38 +215,46 @@ final class PirateShipAi {
     }
 
     private static Navigation attack(Ship ship, Player target) {
-        double dx = target.getX() - ship.getX();
-        double dz = target.getZ() - ship.getZ();
-        double distance = Math.sqrt(dx * dx + dz * dz);
-        float targetYaw = (float) Math.toDegrees(Math.atan2(-dx, dz));
-
-        if (distance > 42.0D) {
-            return new Navigation(targetYaw, 0.25F, false, target);
+        if (!target.getUUID().equals(ship.aiCombatTargetId)) {
+            ship.aiCombatTargetId = target.getUUID();
+            ship.aiCombatHelm = new GhostCombatHelm();
         }
-
-        if (distance < MIN_BROADSIDE_DISTANCE) {
-            return new Navigation(targetYaw + 180.0F, 0.22F, false, target);
-        }
-
-        float portBroadside = targetYaw + 90.0F;
-        float starboardBroadside = targetYaw - 90.0F;
-        float desiredYaw = Math.abs(Mth.wrapDegrees(portBroadside - ship.getYRot()))
-                < Math.abs(Mth.wrapDegrees(starboardBroadside - ship.getYRot()))
-                ? portBroadside
-                : starboardBroadside;
-        return new Navigation(desiredYaw, 0.14F, distance <= MAX_CANNON_DISTANCE, target);
+        Entity vehicle = target.getVehicle() != null ? target.getVehicle() : target;
+        Vec3 velocity = vehicle.getDeltaMovement();
+        Vec3 aim = calculateIntercept(ship, target);
+        double aimLength = Math.hypot(aim.x, aim.z);
+        boolean angle = aimLength > 0.001 && Math.abs(
+                Kalkuel.calculateMotionX(1, ship.getYRot()) * aim.x / aimLength
+                        + Kalkuel.calculateMotionZ(1, ship.getYRot()) * aim.z / aimLength) <= 0.35;
+        var order = ship.aiCombatHelm.tick(new GhostCombatHelm.Input(
+                ship.getX(), ship.getZ(), ship.getYRot(), vehicle.getX(), vehicle.getZ(),
+                Mth.clamp(velocity.x, -1, 1), Mth.clamp(velocity.z, -1, 1),
+                ship.getDamage(), ship.getAttributes().maxHealth, angle), ship.level().getRandom()::nextInt);
+        return new Navigation(order.yaw(), order.speed(), order.fire(), target);
     }
 
     private static void move(Ship ship, ServerLevel level, Navigation navigation) {
         float desiredYaw = Mth.wrapDegrees(navigation.yaw());
         float desiredSpeed = navigation.speed();
 
-        if (!hasWaterAhead(level, ship, desiredYaw, 4.0D)
-                || !hasWaterAhead(level, ship, desiredYaw, 7.0D)) {
-            desiredYaw = Mth.wrapDegrees(desiredYaw + 90.0F);
-            ship.aiPatrolYaw = desiredYaw;
-            ship.aiPatrolTicks = 80;
-            desiredSpeed = Math.min(desiredSpeed, 0.08F);
+        if (ship.aiAvoidTicks > 0 && isClearCourse(level, ship, ship.aiAvoidYaw)) {
+            ship.aiAvoidTicks--;
+            desiredYaw = ship.aiAvoidYaw;
+            desiredSpeed = Math.min(desiredSpeed, 0.12F);
+        } else if (!isClearCourse(level, ship, desiredYaw)
+                || !isClearCourse(level, ship, ship.getYRot())) {
+            float bestYaw = ship.getYRot();
+            double bestScore = -Double.MAX_VALUE;
+            for (int offset : new int[]{0, 30, -30, 60, -60, 90, -90, 135, -135, 180}) {
+                float candidate = Mth.wrapDegrees(desiredYaw + offset);
+                if (!isClearCourse(level, ship, candidate)) continue;
+                double score = -Math.abs(offset) - 0.35 * Math.abs(Mth.wrapDegrees(candidate - ship.getYRot()));
+                if (score > bestScore) { bestScore = score; bestYaw = candidate; }
+            }
+            desiredYaw = bestYaw;
+            desiredSpeed = bestScore == -Double.MAX_VALUE ? 0 : Math.min(desiredSpeed, 0.10F);
+            ship.aiAvoidYaw = desiredYaw;
+            ship.aiAvoidTicks = bestScore == -Double.MAX_VALUE ? 0 : 40;
         }
 
         float maxShipSpeed = ship.getAttributes().maxSpeed / (60.0F * 1.15F);
@@ -264,7 +308,7 @@ final class PirateShipAi {
                 aim.y,
                 PirateCaptain.projectileOwner(ship),
                 CANNON_BALL_SPEED,
-                CANNON_BALL_ACCURACY
+                com.talhanation.smallships.config.GhostShipsConfig.general().cannonInaccuracy
         );
     }
 
@@ -348,6 +392,14 @@ final class PirateShipAi {
         );
     }
 
+    private static boolean isClearCourse(ServerLevel level, Ship ship, float yaw) {
+        if (!hasWaterAhead(level, ship, yaw, 4) || !hasWaterAhead(level, ship, yaw, 8)
+                || !hasWaterAhead(level, ship, yaw, 12)) return false;
+        double dx = Kalkuel.calculateMotionX(4, yaw);
+        double dz = Kalkuel.calculateMotionZ(4, yaw);
+        return level.noCollision(ship, ship.getBoundingBox().move(dx, 0, dz));
+    }
+
     private static boolean hasWaterAhead(ServerLevel level, Ship ship, float yaw, double distance) {
         double x = ship.getX() + Kalkuel.calculateMotionX((float) distance, yaw);
         double z = ship.getZ() + Kalkuel.calculateMotionZ((float) distance, yaw);
@@ -370,10 +422,12 @@ final class PirateShipAi {
         }
         ship.aiLootDropped = true;
 
+        if (level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+            PirateLoot.drop(ship, level);
+        } else {
+            com.talhanation.smallships.SmallShipsMod.LOGGER.info("Ghost rewards disabled by doEntityDrops=false at {}", ship.blockPosition());
+        }
         if (ship instanceof ContainerShip containerShip) {
-            if (level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
-                Containers.dropContents(level, ship, containerShip);
-            }
             containerShip.clearContent();
         }
     }

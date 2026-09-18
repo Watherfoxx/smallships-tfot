@@ -23,6 +23,8 @@ public class SmallshipsModFabric implements ModInitializer {
         new SmallShipsConfigImpl();
         new SmallShipsMod();
         new ModEntityTypes();
+        net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry.register(
+                ModEntityTypes.GHOST_CREW, net.minecraft.world.entity.monster.Pillager.createAttributes());
         new ModMenuTypes();
         new ModItems();
         ShipItemDurabilityUpdater.markItemsReady();
@@ -32,6 +34,8 @@ public class SmallshipsModFabric implements ModInitializer {
 
         UseEntityCallback.EVENT.register(new PassengerEvents());
         ServerTickEvents.END_WORLD_TICK.register(PirateShipSpawner::tick);
+        net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.SERVER_STARTING.register(server ->
+                com.talhanation.smallships.config.GhostShipsConfig.onServerStarting());
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             if (handler.player.getVehicle() instanceof Ship ship) {
                 ship.stopShipFromDisconnectedDriver(handler.player);

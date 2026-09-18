@@ -29,3 +29,16 @@ publishing {
         // Add repositories to publish to here.
     }
 }
+
+tasks.register('ghostLootTest', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.talhanation.smallships.config.GhostLootTableTest'
+}
+tasks.named('check') { dependsOn 'ghostLootTest' }
+tasks.register('ghostCombatTest', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.talhanation.smallships.world.entity.ship.GhostCombatHelmTest'
+}
+tasks.named('check') { dependsOn 'ghostCombatTest' }

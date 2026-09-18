@@ -84,6 +84,9 @@ public abstract class  ShipRenderer<T extends Ship> extends EntityRenderer<T> {
     @Override
     public void render(T shipEntity, float entityYaw, float partialTicks, @NotNull PoseStack poseStack, @NotNull MultiBufferSource multiBufferSource, int packedLight) {
         boolean ghostShip = shipEntity.isGhostShip();
+        if (ghostShip) {
+            poseStack.mulPose(Axis.XP.rotationDegrees(shipEntity.getGhostPitch(partialTicks)));
+        }
         int renderLight = ghostShip ? LightTexture.FULL_BRIGHT : packedLight;
         Attributes shipAttributes = shipEntity.getAttributes();
         float h = ((float) shipEntity.getHurtTime() - partialTicks) / ((shipAttributes.maxHealth * shipEntity.getBbWidth()) / 40.0F);

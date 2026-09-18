@@ -67,6 +67,9 @@ public abstract class Ship extends Boat {
     private static final EntityDataAccessor<Boolean> RIGHT = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> SUNKEN = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> GHOST_SHIP = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Float> GHOST_PITCH = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.FLOAT);
+    private float previousGhostPitch;
+    private float renderedGhostPitch;
     public static final EntityDataAccessor<CompoundTag> SHIELD_DATA = SynchedEntityData.defineId(Ship.class, EntityDataSerializers.COMPOUND_TAG);
     private boolean isLocked = false;
     private int sunkenTime = 0;
@@ -96,6 +99,10 @@ public abstract class Ship extends Boat {
     int aiStateTicks;
     int aiCombatIdleTicks;
     double aiSurfaceY;
+    GhostCombatHelm aiCombatHelm = new GhostCombatHelm();
+    UUID aiCombatTargetId;
+    int aiAvoidTicks;
+    float aiAvoidYaw;
 
     public Ship(EntityType<? extends Boat> entityType, Level level) {
         super(entityType, level);
@@ -107,6 +114,8 @@ public abstract class Ship extends Boat {
 
     @Override
     public void tick() {
+        previousGhostPitch = renderedGhostPitch;
+        renderedGhostPitch = this.getEntityData().get(GHOST_PITCH);
         super.tick();
 
         if (!this.level().isClientSide && this.aiControlled && !this.isRemoved()) {
@@ -122,9 +131,13 @@ public abstract class Ship extends Boat {
         if (this.getDamage() > 0.0F) {
             this.setDamage(this.getDamage() + 1.0F);
         }
+        if (this.isGhostShip() && this.isSunken()) this.setDamage(this.getAttributes().maxHealth);
 
         if(isSunken()){
-            if(++this.sunkenTime > SmallShipsConfig.Common.shipGeneralDespawnTimeSunken.get()*20*60) this.destroy(this.getCommandSenderWorld().damageSources().drown());
+            if(!this.level().isClientSide && ++this.sunkenTime > (this.aiControlled
+                    ? com.talhanation.smallships.config.GhostShipsConfig.forShip(this).despawnSeconds * 20
+                    : SmallShipsConfig.Common.shipGeneralDespawnTimeSunken.get() * 20 * 60))
+                this.destroy(this.getCommandSenderWorld().damageSources().drown());
             else this.setDeltaMovement (getDeltaMovement().x, - 0.2D, getDeltaMovement().z);
         }
         else {
@@ -151,6 +164,11 @@ public abstract class Ship extends Boat {
         }
 
         Player driver = this.getDriver();
+        // A dead player can remain mounted during the death screen.
+        if (!this.isAiControlled() && driver != null && !driver.isAlive()) {
+            this.stopDriverControls();
+            return;
+        }
         UUID currentDriverUuid = driver != null ? driver.getUUID() : null;
 
         if (!Objects.equals(this.lastDriverUuid, currentDriverUuid)) {
@@ -197,6 +215,7 @@ public abstract class Ship extends Boat {
         this.getEntityData().define(RIGHT, false);
         this.getEntityData().define(SUNKEN, false);
         this.getEntityData().define(GHOST_SHIP, false);
+        this.getEntityData().define(GHOST_PITCH, 0.0F);
 
         if (this instanceof Sailable sailShip) sailShip.defineSailShipSynchedData();
         if (this instanceof Bannerable bannerShip) bannerShip.defineBannerShipSynchedData();
@@ -217,12 +236,14 @@ public abstract class Ship extends Boat {
         if (this instanceof Cannonable cannonShip) cannonShip.readCannonShipSaveData(tag);
         if (this instanceof Shieldable shieldShip) shieldShip.readShieldShipSaveData(tag);
 
+        this.aiControlled = tag.getBoolean("PirateShip");
         this.setSunken(tag.getBoolean("Sunken"));
         this.isLocked = (tag.getBoolean("locked"));
         this.ownerUuid = tag.hasUUID("Owner") ? tag.getUUID("Owner") : null;
         this.aiControlled = tag.getBoolean("PirateShip");
         this.getEntityData().set(GHOST_SHIP, this.aiControlled);
         this.aiLootDropped = tag.getBoolean("PirateLootDropped");
+        this.sunkenTime = tag.getInt("SunkenTime");
         this.aiTicksWithoutNearbyPlayer = tag.getInt("PirateTicksWithoutPlayer");
         this.aiState = tag.getInt("PirateState");
         this.aiStateTicks = tag.getInt("PirateStateTicks");
@@ -253,6 +274,7 @@ public abstract class Ship extends Boat {
         }
         tag.putBoolean("PirateShip", this.aiControlled);
         tag.putBoolean("PirateLootDropped", this.aiLootDropped);
+        tag.putInt("SunkenTime", this.sunkenTime);
         tag.putInt("PirateTicksWithoutPlayer", this.aiTicksWithoutNearbyPlayer);
         tag.putInt("PirateState", this.aiState);
         tag.putInt("PirateStateTicks", this.aiStateTicks);
@@ -594,6 +616,14 @@ public abstract class Ship extends Boat {
         return this.getEntityData().get(GHOST_SHIP);
     }
 
+    public float getGhostPitch(float partialTicks) {
+        return Mth.lerp(partialTicks, previousGhostPitch, renderedGhostPitch);
+    }
+
+    void setGhostPitch(float pitch) {
+        this.getEntityData().set(GHOST_PITCH, pitch);
+    }
+
     public void setAiControlled(boolean aiControlled) {
         this.aiControlled = aiControlled;
         this.getEntityData().set(GHOST_SHIP, aiControlled);
@@ -695,6 +725,13 @@ public abstract class Ship extends Boat {
 
     @Override
     protected void removePassenger(Entity entity) {
+        // Death may dismount the pilot before the next ship tick.
+        if (!this.level().isClientSide && !this.isAiControlled()
+                && entity instanceof Player player && !player.isAlive()
+                && (player.equals(this.getControllingPassenger())
+                    || player.getUUID().equals(this.lastDriverUuid))) {
+            this.stopDriverControls();
+        }
         // Auto third person: Disable
         if (this.level().isClientSide() && SmallShipsConfig.Client.shipGeneralCameraAutoThirdPerson.get() && Objects.equals(Minecraft.getInstance().player, entity)) {
             Minecraft.getInstance().options.setCameraType(this.previousCameraType);
@@ -706,7 +743,10 @@ public abstract class Ship extends Boat {
         if (!player.equals(this.getControllingPassenger())) {
             return;
         }
+        this.stopDriverControls();
+    }
 
+    private void stopDriverControls() {
         this.setForward(false);
         this.setBackward(false);
         this.setLeft(false);
@@ -728,6 +768,11 @@ public abstract class Ship extends Boat {
 
     public void setSunken(boolean sunken){
         this.entityData.set(SUNKEN, sunken);
+        if (sunken && this.isAiControlled()) {
+            this.setDamage(this.getAttributes().maxHealth);
+            // Remove crew before the sinking boat can eject them into the water.
+            if (!this.level().isClientSide) PirateCaptain.disappearInSmoke(this);
+        }
     }
     public boolean isSunken(){
         return this.entityData.get(SUNKEN);
@@ -890,6 +935,7 @@ public abstract class Ship extends Boat {
             AABB boundingBox = this.getBoundingBox().inflate(2.25, 1.25, 2.25).move(0.0, -2.0, 0.0);
             List<Entity> list = this.level().getEntities(this, boundingBox, EntitySelector.pushableBy(this));
             for(Entity entity: list) {
+                if (this.aiControlled && !(entity instanceof Player) && !(entity instanceof Boat)) continue;
                 if (entity instanceof LivingEntity && !getPassengers().contains(entity)){
                     this.knockBack(entity, this.getSpeed(), boundingBox);
                     this.collisionDamage(entity, this.getSpeed());
@@ -907,6 +953,7 @@ public abstract class Ship extends Boat {
     }
 
     private void collisionDamage(Entity entity, float speed) {
+        if (this.aiControlled && !(entity instanceof Player) && !(entity instanceof Boat)) return;
         if(this.getControllingPassenger() != null){
             if(this.getControllingPassenger() .getTeam() != null && this.getControllingPassenger() .getTeam().isAlliedTo(entity.getTeam()) && !this.getControllingPassenger() .getTeam().isAllowFriendlyFire()) return;
 
@@ -974,7 +1021,7 @@ public abstract class Ship extends Boat {
                 }
                 if(this instanceof Cannonable cannonableShip) cannonableShip.cannonShipDestroyed(this.getCommandSenderWorld(), this);
             }
-            if(this instanceof ContainerShip containerShip) containerShip.chestVehicleDestroyed(damageSource, this.getCommandSenderWorld(), this);
+            if(!this.aiControlled && this instanceof ContainerShip containerShip) containerShip.chestVehicleDestroyed(damageSource, this.getCommandSenderWorld(), this);
         }
 
         if (this.aiControlled) {

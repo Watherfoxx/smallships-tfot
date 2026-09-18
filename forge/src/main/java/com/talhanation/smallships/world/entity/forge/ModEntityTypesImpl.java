@@ -1,6 +1,7 @@
 package com.talhanation.smallships.world.entity.forge;
 
 import com.talhanation.smallships.SmallShipsMod;
+import com.talhanation.smallships.world.entity.ship.GhostCrewEntity;
 import com.talhanation.smallships.world.entity.projectile.CannonBallEntity;
 import com.talhanation.smallships.world.entity.ship.BriggEntity;
 import com.talhanation.smallships.world.entity.ship.CogEntity;
@@ -28,6 +29,9 @@ public class ModEntityTypesImpl {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, SmallShipsMod.MOD_ID);
 
     static {
+        entries.put(GhostCrewEntity.class, ENTITY_TYPES.register(GhostCrewEntity.ID,
+                () -> EntityType.Builder.of(GhostCrewEntity::new, MobCategory.MONSTER)
+                        .sized(0.6F, 1.8F).clientTrackingRange(12).setUpdateInterval(3).build(GhostCrewEntity.ID)));
         entries.put(CannonBallEntity.class, ENTITY_TYPES.register(CannonBallEntity.ID,
                 () -> EntityType.Builder.of(CannonBallEntity::factory, MobCategory.MISC)
                         .sized(0.25F, 0.25F)

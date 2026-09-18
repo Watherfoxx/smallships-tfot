@@ -15,6 +15,10 @@ public class PassengerEvents implements UseEntityCallback {
 
     @Override
     public InteractionResult interact(Player player, Level world, InteractionHand hand, Entity entity, @Nullable EntityHitResult hitResult) {
+        // Use the synced flag so the interaction is blocked on both client and server.
+        if (!(entity instanceof Player) && entity.getVehicle() instanceof Ship ship && ship.isGhostShip()) {
+            return InteractionResult.FAIL;
+        }
         if(!player.isCrouching() && entity.isPassenger()
                 && !(entity instanceof Player)
                 && !(entity.getEncodeId() != null && entity.getEncodeId().contains("captain"))

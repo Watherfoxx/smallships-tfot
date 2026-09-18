@@ -1,6 +1,7 @@
 {
   "entity.smallships.pirate_ship": "Navire fantôme",
   "entity.smallships.pirate_captain": "Capitaine fantôme",
+  "entity.smallships.ghost_crew": "Marin fantôme",
   "category.smallships" : "Bateaux",
   "itemGroup.smallships.smallships": "Small Ships",
   "key.smallships.ship_sail": "Déployer / replier la voile",

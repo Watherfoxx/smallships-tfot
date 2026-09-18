@@ -27,6 +27,7 @@ public class ClientInitializer implements ClientModInitializer {
 
     public void initRendererRegisterRenderers() {
         EntityRendererRegistry.register(ModEntityTypes.CANNON_BALL, CannonBallRenderer::new);
+        EntityRendererRegistry.register(ModEntityTypes.GHOST_CREW, com.talhanation.smallships.client.renderer.entity.GhostCrewRenderer::new);
 
         EntityRendererRegistry.register(ModEntityTypes.COG, CogRenderer::new);
         EntityRendererRegistry.register(ModEntityTypes.BRIGG, BriggRenderer::new);

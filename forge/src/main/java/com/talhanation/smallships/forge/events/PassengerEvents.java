@@ -17,6 +17,7 @@ public class PassengerEvents {
     public void onPlayerInteractWithPassenger(PlayerInteractEvent.EntityInteract event){
         Player player = event.getEntity();
         Entity entity = event.getTarget();
+        if (blockGhostPassengerInteraction(event, entity)) return;
 
         if(!player.isCrouching()
                 && entity.isPassenger()
@@ -37,6 +38,20 @@ public class PassengerEvents {
                 event.setCanceled(true);
             }
         }
+    }
+
+    @SubscribeEvent
+    public void onPlayerInteractWithGhostPassengerAt(PlayerInteractEvent.EntityInteractSpecific event) {
+        blockGhostPassengerInteraction(event, event.getTarget());
+    }
+
+    private static boolean blockGhostPassengerInteraction(PlayerInteractEvent event, Entity target) {
+        if (!(target instanceof Player) && target.getVehicle() instanceof Ship ship && ship.isGhostShip()) {
+            event.setCancellationResult(InteractionResult.FAIL);
+            event.setCanceled(true);
+            return true;
+        }
+        return false;
     }
 
     @SubscribeEvent
